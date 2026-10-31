@@ -1,4 +1,4 @@
-"""Train the ScanGuard phishing URL classifier.
+"""Train the Kanca phishing URL classifier.
 
 Dataset: PhiUSIIL Phishing URL Dataset (UCI ML Repository, id 967).
 In the CSV, label 1 = legitimate and 0 = phishing; we flip it so 1 = phishing.
@@ -8,7 +8,7 @@ so a model trained on full URLs learns "has a path => phishing" (99.6% test
 accuracy, but flags github.com/... and youtube.com/watch as phishing). We
 therefore train on hostname-only features, deduplicated by hostname.
 
-Usage (from the scanguard/ folder):
+Usage (from the kanca/ folder):
     backend/.venv/Scripts/python ml/train.py
 """
 

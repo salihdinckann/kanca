@@ -1,4 +1,4 @@
-"""ScanGuard API."""
+"""Kanca API."""
 
 import os
 from pathlib import Path
@@ -17,10 +17,10 @@ from .reputation import is_known
 
 MODEL_PATH = Path(__file__).resolve().parent.parent / "model.joblib"
 
-app = FastAPI(title="ScanGuard API", version="0.1.0")
+app = FastAPI(title="Kanca API", version="0.1.0")
 app.add_middleware(
     CORSMiddleware,
-    # Comma-separated list in production, e.g. "https://scanguard.vercel.app"
+    # Comma-separated list in production, e.g. "https://kanca.vercel.app"
     allow_origins=os.getenv("ALLOWED_ORIGINS", "*").split(","),
     allow_methods=["*"],
     allow_headers=["*"],

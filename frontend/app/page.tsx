@@ -3,6 +3,7 @@
 import { FormEvent, ReactNode, useEffect, useState } from "react";
 
 import { Engine, Lang, STRINGS, Verdict } from "@/lib/i18n";
+import { Logo } from "@/components/Logo";
 import { OWNER, REPO_URL } from "@/lib/site";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -73,12 +74,6 @@ function useCountUp(target: number, duration = 700) {
 /* ---------- icons ---------- */
 
 const Icon = {
-  shield: (cls = "h-5 w-5") => (
-    <svg viewBox="0 0 24 24" className={cls} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
-      <path d="M12 2.5 4.5 5.5v5.8c0 4.6 3.1 8.6 7.5 10.2 4.4-1.6 7.5-5.6 7.5-10.2V5.5L12 2.5Z" />
-      <path d="m9 12 2 2 4-4" strokeLinecap="round" />
-    </svg>
-  ),
   link: (cls = "h-4 w-4") => (
     <svg viewBox="0 0 24 24" className={cls} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
       <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" />
@@ -152,7 +147,7 @@ function SectionHeading({ eyebrow, title, subtitle }: { eyebrow: string; title: 
   return (
     <div className="max-w-2xl">
       <p className="font-mono text-xs uppercase tracking-widest text-sky-400">{eyebrow}</p>
-      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-3xl">{title}</h2>
+      <h2 className="font-display mt-3 text-2xl font-semibold tracking-tight text-white sm:text-3xl">{title}</h2>
       <p className="mt-3 text-slate-400">{subtitle}</p>
     </div>
   );
@@ -235,10 +230,7 @@ function Footer({ lang }: { lang: Lang }) {
     <footer className="border-t border-white/10">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-3 sm:px-6">
         <div>
-          <div className="flex items-center gap-2 text-white">
-            {Icon.shield("h-5 w-5 text-sky-400")}
-            <span className="font-semibold">ScanGuard</span>
-          </div>
+          <Logo />
           <p className="mt-3 max-w-xs text-sm text-slate-500">{t.disclaimer}</p>
         </div>
         <div>
@@ -345,9 +337,8 @@ export default function Home() {
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-20 border-b border-white/10 bg-[#0a0d14]/80 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <a href="#" className="flex items-center gap-2 text-white">
-            {Icon.shield("h-5 w-5 text-sky-400")}
-            <span className="font-semibold tracking-tight">ScanGuard</span>
+          <a href="#" aria-label="Kanca">
+            <Logo />
           </a>
           <nav className="flex items-center gap-1 text-sm sm:gap-5">
             <a href="#how" className="hidden text-slate-400 transition-colors hover:text-white sm:block">
@@ -384,7 +375,7 @@ export default function Home() {
                 {t.eyebrow}
               </p>
               <h1
-                className="fade-up mx-auto mt-6 max-w-2xl text-4xl font-semibold tracking-tight text-white sm:text-5xl"
+                className="fade-up font-display mx-auto mt-6 max-w-2xl text-balance text-3xl font-semibold leading-tight tracking-tight text-white sm:text-5xl sm:leading-tight"
                 style={{ animationDelay: "0.05s" }}
               >
                 {t.title}

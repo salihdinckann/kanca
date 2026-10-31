@@ -6,4 +6,4 @@ export const OWNER = {
   email: "salih.dinckan@std.hku.edu.tr",
 };
 
-export const REPO_URL = "https://github.com/salihdinckann/scanguard";
+export const REPO_URL = "https://github.com/salihdinckann/kanca";

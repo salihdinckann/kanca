@@ -6,9 +6,9 @@ export const STRINGS = {
   tr: {
     nav: { how: "Nasıl çalışır", model: "Model", source: "Kaynak kod" },
     eyebrow: "Açık kaynak · Yapay zeka destekli",
-    title: "Şüpheli linkleri tıklamadan önce kontrol edin",
+    title: "Kancayı yemeden önce gör.",
     subtitle:
-      "ScanGuard, SMS, e-posta ve mesajlarla gelen linkleri makine öğrenmesiyle analiz eder; risk skorunu ve gerekçelerini saniyeler içinde gösterir.",
+      "Kanca, SMS, e-posta ve mesajlarla gelen şüpheli linkleri makine öğrenmesiyle analiz eder; tıklamadan önce risk skorunu ve gerekçelerini saniyeler içinde gösterir.",
     placeholder: "https://ornek-site.com/giris",
     inputLabel: "Taranacak link",
     scan: "Analiz et",
@@ -62,7 +62,7 @@ export const STRINGS = {
     leakBody:
       "İlk model %99,6 doğruluk verdi, ancak veri setindeki güvenli linklerin tamamı yolsuz ana sayfalardı; model \"linkte yol var mı\" kısayolunu öğrenmişti. Model yalnızca alan adı özellikleriyle yeniden eğitildi ve aynı alan adının hem eğitim hem test setinde yer alması engellendi. Sonuç daha düşük ama gerçek dünyada güvenilir.",
     disclaimer:
-      "ScanGuard sonuçları bilgilendirme amaçlıdır ve kesin güvenlik garantisi vermez.",
+      "Kanca'nın sonuçları bilgilendirme amaçlıdır ve kesin güvenlik garantisi vermez.",
     builtBy: "Geliştiren",
     role: "Bilgisayar Mühendisliği Öğrencisi",
     contact: "İletişim",
@@ -71,9 +71,9 @@ export const STRINGS = {
   en: {
     nav: { how: "How it works", model: "Model", source: "Source code" },
     eyebrow: "Open source · AI-powered",
-    title: "Check suspicious links before you click",
+    title: "See the hook before you bite.",
     subtitle:
-      "ScanGuard analyzes links from SMS, email and messages with machine learning, and shows a risk score with clear reasons in seconds.",
+      "Kanca analyzes suspicious links from SMS, email and messages with machine learning, and shows a risk score with clear reasons before you click.",
     placeholder: "https://example-site.com/login",
     inputLabel: "Link to analyze",
     scan: "Analyze",
@@ -126,7 +126,7 @@ export const STRINGS = {
     leakTitle: "Why not 99%?",
     leakBody:
       "The first model scored 99.6%, but every legitimate URL in the dataset was a bare homepage, so it had learned the shortcut \"has a path means phishing\". It was retrained on hostname-only features, with no domain allowed in both train and test. The score is lower, but it holds up on real-world links.",
-    disclaimer: "ScanGuard results are for information only and are not a security guarantee.",
+    disclaimer: "Kanca results are for information only and are not a security guarantee.",
     builtBy: "Built by",
     role: "Computer Engineering Student",
     contact: "Contact",

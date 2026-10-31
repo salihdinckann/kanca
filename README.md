@@ -1,6 +1,11 @@
-# ScanGuard
+<p align="center"><img src="frontend/app/icon.svg" width="72" alt="Kanca logo"></p>
+
+<h1 align="center">Kanca</h1>
+<p align="center"><b>See the hook before you bite.</b> · <i>Kancayı yemeden önce gör.</i></p>
 
 **AI-powered phishing link scanner.** Paste a suspicious link from an SMS, email or WhatsApp message and get a risk score with plain-language reasons, in Turkish or English.
+
+*Kanca* is Turkish for "hook": phishing is *oltalama* ("fishing with a rod") in Turkish.
 
 > 🇹🇷 Yapay zeka destekli oltalama (phishing) link tarayıcı. Şüpheli linki yapıştır, risk skorunu ve nedenlerini Türkçe veya İngilizce gör.
 

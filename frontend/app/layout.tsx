@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Unbounded } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -12,10 +12,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const unbounded = Unbounded({
+  variable: "--font-unbounded",
+  subsets: ["latin", "latin-ext"],
+  weight: ["500", "600", "700"],
+});
+
 export const metadata: Metadata = {
-  title: "ScanGuard — Bu link güvenli mi?",
+  title: "Kanca — Kancayı yemeden önce gör",
   description:
-    "Yapay zeka destekli phishing (oltalama) link tarayıcı. Şüpheli linki yapıştır, saniyeler içinde risk skorunu ve nedenlerini gör.",
+    "Yapay zeka destekli oltalama (phishing) link tarayıcı. Şüpheli linki yapıştır, risk skorunu ve nedenlerini saniyeler içinde gör.",
 };
 
 export default function RootLayout({
@@ -25,7 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="tr">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${unbounded.variable} antialiased`}>
         {children}
       </body>
     </html>

@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: scanguard-api
+    name: kanca-api
     runtime: python
     plan: free
     rootDir: backend
@@ -11,4 +11,4 @@ services:
       - key: PYTHON_VERSION
         value: 3.13.7
       - key: ALLOWED_ORIGINS
-        sync: false # set to your Vercel URL, e.g. https://scanguard.vercel.app
+        sync: false # set to your Vercel URL, e.g. https://kanca.vercel.app
