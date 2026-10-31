@@ -27,5 +27,25 @@ KNOWN_DOMAINS = {
 }
 
 
-def is_known(registered_domain: str) -> bool:
-    return registered_domain in KNOWN_DOMAINS
+# Exact hostnames we trust on shared hosting platforms (Kanca's own site).
+KNOWN_HOSTS = {
+    "kanca-inky.vercel.app",
+}
+
+# Platforms where anyone can publish under a free subdomain. Phishing kits are
+# often hosted here, so the platform itself is never trusted.
+HOSTING_PLATFORMS = {
+    "vercel.app", "netlify.app", "github.io", "gitlab.io", "pages.dev",
+    "workers.dev", "web.app", "firebaseapp.com", "herokuapp.com", "onrender.com",
+    "glitch.me", "repl.co", "replit.app", "blogspot.com", "wixsite.com",
+    "weebly.com", "000webhostapp.com", "azurewebsites.net", "appspot.com",
+    "surge.sh", "fly.dev", "railway.app",
+}
+
+
+def is_known(host: str, registered_domain: str) -> bool:
+    return host in KNOWN_HOSTS or registered_domain in KNOWN_DOMAINS
+
+
+def is_hosting_platform(registered_domain: str) -> bool:
+    return registered_domain in HOSTING_PLATFORMS

@@ -205,6 +205,10 @@ REASONS = {
              "The connection is not encrypted (no HTTPS)."),
     "known": ("{domain} bilinen ve güvenilir bir alan adı.",
               "{domain} is a well-known, trusted domain."),
+    "hosting": ("{domain} ücretsiz bir barındırma platformu; herkes bu platformda site açabilir. Sitenin sahibinden emin ol.",
+                "{domain} is a free hosting platform where anyone can publish a site. Make sure you trust the owner."),
+    "model": ("Makine öğrenmesi modeli alan adının yapısını (uzunluk, alt alan adları, karakterler) olağan dışı buldu.",
+              "The machine learning model found the domain's structure (length, subdomains, characters) unusual."),
 }
 
 

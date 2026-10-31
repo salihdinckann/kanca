@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 from .features import (
     HOST_FEATURE_NAMES, explain, extract_features, host_feature_vector, host_of, reason, split_host,
 )
-from .reputation import is_known
+from .reputation import KNOWN_HOSTS, is_hosting_platform, is_known
 
 MODEL_PATH = Path(__file__).resolve().parent.parent / "model.joblib"
 
@@ -83,13 +83,14 @@ def health():
 @app.post("/api/scan/url", response_model=UrlScanResponse)
 def scan_url(req: UrlScanRequest):
     feats = extract_features(req.url)
-    _, registered = split_host(host_of(req.url))
-    if is_known(registered):
+    host = host_of(req.url)
+    _, registered = split_host(host)
+    if is_known(host, registered):
         return UrlScanResponse(
             url=req.url,
             risk_score=2,
             verdict="safe",
-            reasons=[reason("known", req.lang, domain=registered)],
+            reasons=[reason("known", req.lang, domain=host if host in KNOWN_HOSTS else registered)],
             engine="reputation",
         )
 
@@ -102,10 +103,19 @@ def scan_url(req: UrlScanRequest):
         engine = "heuristic"
 
     score = round(prob * 100)
+    reasons = explain(feats, req.lang)
+    if not reasons and score >= 40:
+        # Only the model is suspicious and no concrete signal backs it up:
+        # never call it "dangerous" without a reason we can show.
+        score = min(score, 65)
+        reasons.append(reason("model", req.lang))
+    if is_hosting_platform(registered):
+        reasons.insert(0, reason("hosting", req.lang, domain=registered))
+
     return UrlScanResponse(
         url=req.url,
         risk_score=score,
         verdict=_verdict(score),
-        reasons=explain(feats, req.lang),
+        reasons=reasons,
         engine=engine,
     )
