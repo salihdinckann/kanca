@@ -11,4 +11,4 @@ export const REPO_URL = "https://github.com/salihdinckann/kanca";
 export const SITE_URL = "https://kanca-inky.vercel.app";
 
 // Google Search Console "HTML tag" verification code (the content="..." value).
-export const GOOGLE_VERIFICATION = "";
+export const GOOGLE_VERIFICATION = "WhzxQ7c34y0L0mqkkkUO6vo7dJlt30Dh9OW-K11-asw";
