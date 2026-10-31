@@ -9,7 +9,7 @@
 
 > 🇹🇷 Yapay zeka destekli oltalama (phishing) link tarayıcı. Şüpheli linki yapıştır, risk skorunu ve nedenlerini Türkçe veya İngilizce gör.
 
-**Live demo:** _coming soon_
+**Live demo:** [kanca-inky.vercel.app](https://kanca-inky.vercel.app)
 
 ## Features
 
