@@ -7,3 +7,8 @@ export const OWNER = {
 };
 
 export const REPO_URL = "https://github.com/salihdinckann/kanca";
+
+export const SITE_URL = "https://kanca-inky.vercel.app";
+
+// Google Search Console "HTML tag" verification code (the content="..." value).
+export const GOOGLE_VERIFICATION = "";
