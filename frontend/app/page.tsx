@@ -442,9 +442,11 @@ export default function Home() {
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden">
       <header className="relative z-10">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
-          <a href="#" aria-label="Kanca">
-            <Logo />
+        <div className="mx-auto flex h-[72px] max-w-6xl items-center justify-between px-5 sm:px-8">
+          {/* A plain <a> on purpose: clicking the logo should fully reload the page, which <Link> wouldn't. */}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+          <a href="/" aria-label="Kanca" className="transition-opacity hover:opacity-80">
+            <Logo size="lg" />
           </a>
           <nav className="flex items-center gap-5 text-sm sm:gap-7">
             <a href="#how" className="hidden text-muted transition-colors hover:text-paper sm:block">
