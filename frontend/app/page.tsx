@@ -73,10 +73,11 @@ function useCountUp(target: number, duration = 800) {
   return value;
 }
 
-/** Adds `is-in` to .reveal / .reveal-line elements as they scroll into view. */
-function useReveal() {
+/** Adds `is-in` to .reveal / .reveal-line elements as they scroll into view.
+ *  Re-runs when `dep` changes so elements re-rendered after a language switch get picked up too. */
+function useReveal(dep: unknown) {
   useEffect(() => {
-    const els = document.querySelectorAll(".reveal, .reveal-line");
+    const els = document.querySelectorAll(".reveal:not(.is-in), .reveal-line:not(.is-in)");
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
@@ -90,7 +91,7 @@ function useReveal() {
     );
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
-  }, []);
+  }, [dep]);
 }
 
 function HookUnderline() {
@@ -295,7 +296,7 @@ export default function Home() {
   const [scanId, setScanId] = useState(0);
   const t = STRINGS[lang];
 
-  useReveal();
+  useReveal(lang);
 
   // Wake the API as soon as the page opens: on the free plan it sleeps after
   // 15 idle minutes, and waking takes ~50 s. By the time a link is pasted it
@@ -628,7 +629,7 @@ export default function Home() {
             <ol className="relative">
               <span className="reveal-line absolute bottom-2 left-[5px] top-2 w-px bg-gradient-to-b from-sea/60 via-sea/25 to-transparent" aria-hidden="true" />
               {t.how.map(([depth, title, desc], i) => (
-                <li key={title} className="reveal relative pb-14 pl-12 last:pb-0" style={{ transitionDelay: `${i * 0.12}s` }}>
+                <li key={i} className="reveal relative pb-14 pl-12 last:pb-0" style={{ transitionDelay: `${i * 0.12}s` }}>
                   <span
                     className={`absolute left-0 top-1.5 h-[11px] w-[11px] rounded-full border-2 ${
                       i === 0 ? "border-bobber bg-bobber" : "border-sea/70 bg-ink"
