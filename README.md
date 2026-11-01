@@ -41,7 +41,7 @@ URL ──► Google Safe Browsing ──listed──► dangerous
 |---|---|
 | Threat list | Google Safe Browsing v4 lookup (optional, enabled with `SAFE_BROWSING_API_KEY`). |
 | Reputation | Hand-picked global and Turkish domains plus the [Tranco](https://tranco-list.eu/) top 10k, with multi-part suffix handling (`.com.tr`, `.co.uk`). Hosting platforms, file storage and URL shorteners are removed, since phishing kits live there too. |
-| ML model | `HistGradientBoostingClassifier` on 16 lexical hostname features: length, digits, subdomains, entropy, suspicious TLD, brand-in-subdomain, punycode, and more. |
+| ML model | `HistGradientBoostingClassifier` on 19 lexical hostname features: length, digits, subdomain structure, entropy, suspicious TLD, brand-in-subdomain, punycode, and more. |
 | Domain age | Registration date from RDAP, cached for a day. Brand-new domains raise the score; long-established ones lower it. |
 | Rules | Signals outside the hostname that the model never sees, such as `@` tricks, embedded redirects and phishing keywords in the path. |
 
@@ -67,17 +67,36 @@ The honest result on a held-out test set:
 
 | Metric | Value |
 |---|---|
-| Accuracy | 85.4% |
-| F1 (phishing) | 0.778 |
-| ROC AUC | 0.866 |
-| Precision (phishing) | 0.93 |
+| Accuracy | 85.2% |
+| Precision (phishing) | 93.7% |
+| Recall (phishing) | 66.1% |
+| F1 (phishing) | 0.775 |
+| ROC AUC | 0.862 |
 
 The score is lower, but the model now behaves correctly on real-world links.
+
+## The same bias, again: subdomains
+
+After launch, Kanca flagged its own `kanca-inky.vercel.app` and sites like `docs.python.org`. No legitimate host in PhiUSIIL has a subdomain, so the hostname model learned "has a subdomain → phishing". `ml/subdomain_benchmark.py` measures it (model alone, threshold 0.4):
+
+| | Before | After |
+|---|---|---|
+| False alarms, held-out legit hosts + `docs.`/`blog.`… | 81.8% | **6.1%** |
+| False alarms, 30 real legit subdomain sites | 86.7% | **16.7%** |
+| Phishing caught, all held-out | 68.8% | 68.1% |
+| Phishing caught, those with subdomains | 96.6% | 95.3% |
+
+**Fix:**
+1. **Data augmentation:** 20% of legitimate *training* hosts get a copy with a common subdomain (`docs.`, `blog.`, `api.` …). The test split is untouched.
+2. **Three new features:** whether the subdomain is a common one, its length, and its digits/hyphens.
+3. **Established parent rule:** a plain-word subdomain (`sqlmodel.`) of a domain registered for 2+ years is judged by its parent domain. Attackers rarely own years-old domains.
+
+Augmenting with product-like random words was also tried: it cut false alarms further but lost up to 7 points of phishing detection, so the rule above handles those cases instead.
 
 ## Tech stack
 
 - **Backend:** Python, FastAPI, scikit-learn, pandas, httpx (async RDAP / Safe Browsing)
-- **Tests:** pytest (26 tests, network lookups faked), GitHub Actions CI
+- **Tests:** pytest (30 tests, network lookups faked), GitHub Actions CI
 - **Frontend:** Next.js 15, React 19, TypeScript, Tailwind CSS
 - **Deploy:** Render (API) and Vercel (web)
 

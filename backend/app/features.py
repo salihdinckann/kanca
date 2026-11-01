@@ -137,7 +137,20 @@ HOST_FEATURE_NAMES = [
     "num_subdomains", "longest_label", "tld_length", "vowel_ratio",
     "has_ip", "has_punycode", "is_shortener", "suspicious_tld",
     "suspicious_word_count", "brand_in_subdomain", "host_entropy",
+    "common_subdomain", "subdomain_length", "subdomain_digits_hyphens",
 ]
+
+# Subdomain labels that legitimate sites use everywhere. Login/account/secure
+# style words are deliberately absent: those are phishing favourites.
+COMMON_SUBDOMAINS = {
+    "docs", "doc", "blog", "blogs", "api", "apis", "mail", "webmail", "shop", "store",
+    "app", "apps", "support", "help", "news", "m", "mobile", "en", "tr", "de", "fr",
+    "es", "it", "ru", "jp", "dev", "developer", "developers", "careers", "jobs",
+    "status", "cdn", "static", "media", "images", "img", "community", "forum",
+    "forums", "wiki", "learn", "academy", "events", "investors", "ir", "press",
+    "about", "go", "cloud", "maps", "music", "video", "tv", "play", "library",
+    "research", "web", "labs", "beta", "engineering", "code", "kb", "en-us", "ogrenci",
+}
 
 
 def host_of(url: str) -> str:
@@ -171,6 +184,9 @@ def extract_host_features(url: str) -> dict:
         "suspicious_word_count": sum(w in host for w in SUSPICIOUS_WORDS),
         "brand_in_subdomain": int(any(b in subdomain for b in BRANDS)),
         "host_entropy": _entropy(host),
+        "common_subdomain": int(bool(subdomain) and all(l in COMMON_SUBDOMAINS for l in subdomain.split("."))),
+        "subdomain_length": len(subdomain),
+        "subdomain_digits_hyphens": sum(ch.isdigit() or ch == "-" for ch in subdomain),
     }
 
 

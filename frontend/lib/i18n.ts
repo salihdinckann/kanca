@@ -61,7 +61,7 @@ export const STRINGS = {
     howTitle: "Her link dört katmandan geçer.",
     how: [
       ["Yüzey", "İtibar ve tehdit listeleri", "Link önce Google Safe Browsing'in bilinen tehlikeli siteler listesinde aranır. Ardından elle seçilmiş güvenilir alan adları ve dünyanın en çok ziyaret edilen 10.000 sitesi (Tranco listesi) kontrol edilir. Herkesin sayfa açabildiği barındırma platformları ve link kısaltıcılar bilerek güvenilir sayılmaz."],
-      ["Orta su", "Makine öğrenmesi", "Bilinmeyen alan adlarını gradient boosting modeli değerlendirir: uzunluk, alt alan adları, rakamlar, entropi, uzantı ve marka taklidi gibi 16 özellik."],
+      ["Orta su", "Makine öğrenmesi", "Bilinmeyen alan adlarını gradient boosting modeli değerlendirir: uzunluk, alt alan adları, rakamlar, entropi, uzantı ve marka taklidi ve alt alan adının yapısı gibi 19 özellik."],
       ["Derin su", "Alan adının yaşı", "Alan adının ne zaman alındığı RDAP kayıtlarından sorgulanır. Oltalama siteleri genelde birkaç günlük alan adları kullanır; birkaç yıllık köklü alan adları daha düşük risk taşır."],
       ["Dip", "Açıklanabilir sonuç", "Yoldaki ve protokoldeki işaretler (@ hilesi, yönlendirme, HTTPS eksikliği) kurallarla puanlanır. Her skor, onu tetikleyen nedenlerle gelir; somut bir neden yoksa sonuç asla \"tehlikeli\" olmaz. Mesaj sekmesine SMS'in tamamını yapıştırırsan içindeki linkler otomatik bulunup tek tek taranır."],
     ],
@@ -70,16 +70,20 @@ export const STRINGS = {
     modelSubtitle:
       "UCI PhiUSIIL veri setindeki 235 bin gerçek link üzerinde eğitildi; daha önce hiç görmediği alan adlarında test edildi.",
     metrics: [
-      ["Doğruluk", "%85,4"],
-      ["Kesinlik (phishing)", "%93,4"],
-      ["F1", "0,778"],
-      ["ROC AUC", "0,866"],
+      ["Doğruluk", "%85,2"],
+      ["Kesinlik (phishing)", "%93,7"],
+      ["F1", "0,775"],
+      ["ROC AUC", "0,862"],
     ],
     leakTitle: "İlk model %99,6 aldı. Kullanmadık.",
     leakBody:
       "Veri setindeki güvenli linklerin tamamı yolsuz ana sayfalardı. Model, phishing'i değil \"linkte yol var mı\" sorusunu öğrenmişti ve github.com/... gibi adreslere tehlikeli diyordu. Model yalnızca alan adı özellikleriyle yeniden eğitildi ve aynı alan adının hem eğitim hem test setine düşmesi engellendi.",
     v1: "v1 · tam link",
     v2: "v2 · yalnızca alan adı",
+    subTitle: "Sonra aynı sorunun küçük kardeşini bulduk: alt alan adları.",
+    subBody:
+      "Veri setindeki güvenli sitelerin hiçbirinde alt alan adı yoktu; model docs.python.org veya tr.wikipedia.org gibi adreslere de şüpheli diyordu. Eğitim verisine yaygın alt alan adlı (docs., blog., api.) güvenli örnekler eklendi (veri artırma) ve alt alan adının yapısını ölçen 3 yeni özellik tanımlandı. Phishing yakalama oranı korunurken yanlış alarmlar 5 kat azaldı. Kalan ürün adlı alt alan adları (sqlmodel.tiangolo.com gibi) için ise yıllardır kayıtlı ana alan adına bakılıyor.",
+    subLabel: "gerçek alt alan adlı sitelerde yanlış alarm",
     disclaimer: "Kanca'nın sonuçları bilgilendirme amaçlıdır, güvenlik garantisi değildir.",
     builtBy: "Geliştiren",
     role: "Bilgisayar Mühendisliği Öğrencisi",
@@ -143,7 +147,7 @@ export const STRINGS = {
     howTitle: "Every link goes through four layers.",
     how: [
       ["Surface", "Reputation and threat lists", "The link is first looked up in Google Safe Browsing's list of known dangerous sites, then checked against hand-picked trusted domains and the world's 10,000 most visited sites (Tranco list). Open hosting platforms and URL shorteners are deliberately never trusted."],
-      ["Mid-water", "Machine learning", "Unknown domains are scored by a gradient boosting model on 16 features: length, subdomains, digits, entropy, TLD and brand impersonation."],
+      ["Mid-water", "Machine learning", "Unknown domains are scored by a gradient boosting model on 16 features: length, subdomains, digits, entropy, TLD, brand impersonation and subdomain structure."],
       ["Deep water", "Domain age", "The domain's registration date is looked up in RDAP records. Phishing sites usually use domains only a few days old; domains registered for years carry less risk."],
       ["Bottom", "Explainable output", "Path and protocol signals (@ tricks, redirects, missing HTTPS) are scored by rules. Every score comes with its reasons, and without a concrete reason the result is never \"dangerous\". Paste a whole SMS in the Message tab and its links are found and checked one by one."],
     ],
@@ -151,16 +155,20 @@ export const STRINGS = {
     modelTitle: "Not a high score. An honest one.",
     modelSubtitle: "Trained on 235k real URLs from the UCI PhiUSIIL dataset and tested on domains it had never seen.",
     metrics: [
-      ["Accuracy", "85.4%"],
-      ["Precision (phishing)", "93.4%"],
-      ["F1", "0.778"],
-      ["ROC AUC", "0.866"],
+      ["Accuracy", "85.2%"],
+      ["Precision (phishing)", "93.7%"],
+      ["F1", "0.775"],
+      ["ROC AUC", "0.862"],
     ],
     leakTitle: "The first model scored 99.6%. We threw it away.",
     leakBody:
       "Every legitimate URL in the dataset was a bare homepage, so the model learned \"does the link have a path?\" instead of phishing, and flagged github.com/... as dangerous. It was retrained on hostname-only features, with no domain allowed in both train and test.",
     v1: "v1 · full URL",
     v2: "v2 · hostname only",
+    subTitle: "Then we found the same problem's little sibling: subdomains.",
+    subBody:
+      "No legitimate site in the dataset had a subdomain, so the model also flagged docs.python.org and tr.wikipedia.org. We added legitimate training examples with common subdomains (docs., blog., api.), a technique called data augmentation, plus 3 features describing the subdomain. False alarms dropped 5x while phishing detection held steady. For the remaining product subdomains (like sqlmodel.tiangolo.com), Kanca looks at the parent domain once it has been registered for years.",
+    subLabel: "false alarms on real subdomain sites",
     disclaimer: "Kanca's results are informational, not a security guarantee.",
     builtBy: "Built by",
     role: "Computer Engineering Student",

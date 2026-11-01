@@ -2,6 +2,7 @@
 
 import asyncio
 import os
+import re
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Literal
@@ -14,7 +15,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from .features import (
-    HOST_FEATURE_NAMES, explain, extract_features, host_feature_vector, host_of, reason, split_host,
+    BRANDS, HOST_FEATURE_NAMES, SUSPICIOUS_WORDS, explain, extract_features, host_feature_vector, host_of,
+    reason, split_host,
 )
 from .intel import domain_age_days, safe_browsing_enabled, safe_browsing_match
 from .reputation import KNOWN_HOSTS, is_hosting_platform, is_known, is_popular
@@ -96,6 +98,25 @@ def _path_boost(feats: dict) -> float:
     return boost
 
 
+ESTABLISHED_DAYS = 730
+
+
+def _model_prob(host: str) -> float:
+    X = pd.DataFrame([host_feature_vector(host)], columns=HOST_FEATURE_NAMES)
+    return float(model.predict_proba(X)[0][1])
+
+
+def _clean_subdomain(sub: str) -> bool:
+    """Plain word labels like "sqlmodel" or "docs.en": no digits, hyphens, brands or bait words."""
+    labels = sub.split(".")
+    return (
+        len(labels) <= 2
+        and all(re.fullmatch(r"[a-z]{2,20}", l) for l in labels)
+        and not any(b in sub for b in BRANDS)
+        and not any(w in sub for w in SUSPICIOUS_WORDS)
+    )
+
+
 def _age_adjustment(days: int | None, lang: str) -> tuple[float, str | None]:
     """Score change and reason for the domain's registration age."""
     if days is None:
@@ -149,8 +170,14 @@ async def analyze(url: str, lang: str) -> UrlScanResponse:
         )
 
     if model is not None:
-        X = pd.DataFrame([host_feature_vector(url)], columns=HOST_FEATURE_NAMES)
-        prob = float(model.predict_proba(X)[0][1]) + _path_boost(feats)
+        model_p = _model_prob(url)
+        sub, _ = split_host(host)
+        if sub and age is not None and age >= ESTABLISHED_DAYS and _clean_subdomain(sub):
+            # A plain-word subdomain of a domain registered for years (sqlmodel.tiangolo.com):
+            # judge the parent domain. The training data has no legit subdomains at all,
+            # so the model over-penalizes product subdomains like this one.
+            model_p = min(model_p, _model_prob(registered))
+        prob = model_p + _path_boost(feats)
         engine = "ml"
     else:
         prob = _heuristic_score(feats)

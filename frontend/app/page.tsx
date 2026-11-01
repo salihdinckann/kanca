@@ -679,6 +679,19 @@ export default function Home() {
               </div>
               <h3 className="mt-10 font-display text-lg font-semibold text-paper">{t.leakTitle}</h3>
               <p className="mt-3 max-w-lg text-[15px] leading-relaxed text-muted">{t.leakBody}</p>
+
+              <div className="mt-12 border-t border-line pt-10">
+                <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                  <p className="font-display text-3xl font-semibold text-faint line-through decoration-bobber decoration-[3px]">
+                    {lang === "tr" ? "%86,7" : "86.7%"}
+                  </p>
+                  <span className="font-mono text-faint">→</span>
+                  <p className="font-display text-3xl font-semibold text-paper">{lang === "tr" ? "%16,7" : "16.7%"}</p>
+                  <p className="w-full font-mono text-[11px] uppercase tracking-[0.15em] text-sea">{t.subLabel}</p>
+                </div>
+                <h3 className="mt-6 font-display text-lg font-semibold text-paper">{t.subTitle}</h3>
+                <p className="mt-3 max-w-lg text-[15px] leading-relaxed text-muted">{t.subBody}</p>
+              </div>
             </div>
           </div>
         </section>

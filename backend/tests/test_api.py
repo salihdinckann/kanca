@@ -82,10 +82,37 @@ def test_hosting_platform_warns_and_skips_domain_age(client, intel):
     assert intel["age_calls"] == []
 
 
-def test_model_alone_never_says_dangerous(client, intel):
-    r = scan(client, "https://blog.example-startup.io/posts/hello")
-    assert r["verdict"] != "dangerous" and r["risk_score"] <= 65
-    assert r["reasons"]
+class AlwaysPhishingModel:
+    def predict_proba(self, X):
+        return [[0.05, 0.95] for _ in range(len(X))]
+
+
+def test_model_alone_never_says_dangerous(client, intel, monkeypatch):
+    monkeypatch.setattr(main, "model", AlwaysPhishingModel())
+    r = scan(client, "https://plain-looking-site.com/")
+    assert r["verdict"] == "suspicious" and r["risk_score"] == 65
+    assert "Makine öğrenmesi" in r["reasons"][0]
+
+
+def test_legit_common_subdomain_is_not_flagged(client, intel):
+    intel["age"] = 2000
+    assert scan(client, "https://docs.example-startup.io/guide")["verdict"] == "safe"
+
+
+def test_product_subdomain_of_established_domain_is_safe(client, intel):
+    intel["age"] = 2935
+    assert scan(client, "https://sqlmodel.tiangolo.com/")["verdict"] == "safe"
+
+
+def test_product_subdomain_of_new_domain_is_not_trusted(client, intel):
+    intel["age"] = 5
+    assert scan(client, "https://sqlmodel.tiangolo.com/")["verdict"] != "safe"
+
+
+def test_suspicious_subdomain_of_old_domain_gets_no_benefit(client, intel):
+    intel["age"] = 3000
+    r = scan(client, "https://paypal-login83.oldsite-example.com/")
+    assert r["verdict"] != "safe"
 
 
 def test_own_site_is_trusted(client, intel):
