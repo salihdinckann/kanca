@@ -4,6 +4,8 @@ Hosting platforms where anyone can publish (firebaseapp.com, github.io,
 sites.google.com, blogspot.com, ...) are deliberately NOT listed here.
 """
 
+from pathlib import Path
+
 KNOWN_DOMAINS = {
     # Global
     "google.com", "youtube.com", "gmail.com", "facebook.com", "instagram.com",
@@ -43,8 +45,26 @@ HOSTING_PLATFORMS = {
 }
 
 
+# Tranco top 10k (built by ml/build_tranco.py, abusable platforms already removed).
+_TRANCO_FILE = Path(__file__).with_name("data") / "tranco_top10k.txt"
+POPULAR_DOMAINS = (
+    {
+        line.strip()
+        for line in _TRANCO_FILE.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.startswith("#")
+    }
+    - HOSTING_PLATFORMS
+    if _TRANCO_FILE.exists()
+    else set()
+)
+
+
 def is_known(host: str, registered_domain: str) -> bool:
     return host in KNOWN_HOSTS or registered_domain in KNOWN_DOMAINS
+
+
+def is_popular(registered_domain: str) -> bool:
+    return registered_domain in POPULAR_DOMAINS
 
 
 def is_hosting_platform(registered_domain: str) -> bool:

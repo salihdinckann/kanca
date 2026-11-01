@@ -15,7 +15,15 @@ type ScanResult = {
   verdict: Verdict;
   reasons: string[];
   engine: Engine;
+  domain_age_days: number | null;
+  safe_browsing: "clean" | "match" | "skipped";
 };
+
+type Mode = "url" | "text";
+
+const SEVERITY: Record<Verdict, number> = { safe: 0, suspicious: 1, dangerous: 2 };
+const SLOW_AFTER_MS = 4000;
+const REQUEST_TIMEOUT_MS = 90_000;
 
 const TONE: Record<Verdict, { text: string; fill: string }> = {
   safe: { text: "text-sea", fill: "bg-sea" },
@@ -35,6 +43,14 @@ function hostOf(url: string) {
   } catch {
     return url;
   }
+}
+
+function formatAge(days: number | null, lang: Lang) {
+  if (days === null) return "—";
+  const u = STRINGS[lang].units;
+  if (days < 60) return `${days} ${u.day}`;
+  if (days < 730) return `${Math.round(days / 30)} ${u.month}`;
+  return `${Math.floor(days / 365)} ${u.year}`;
 }
 
 function useCountUp(target: number, duration = 800) {
@@ -170,15 +186,18 @@ function ResultCard({ result, ms, lang }: { result: ScanResult; ms: number; lang
         ))}
       </div>
 
-      <dl className="mt-6 grid grid-cols-1 border-t border-line font-mono text-xs sm:grid-cols-[1.3fr_1.2fr_auto]">
+      <dl className="mt-6 grid grid-cols-2 gap-px border-t border-line bg-line font-mono text-xs sm:grid-cols-[1.4fr_1.2fr_1fr_0.7fr]">
         {[
           [t.result.domain, hostOf(result.url)],
           [t.result.method, t.engine[result.engine]],
+          [t.result.age, formatAge(result.domain_age_days, lang)],
           [t.result.duration, `${ms} ms`],
-        ].map(([k, val], i) => (
-          <div key={k} className={`min-w-0 px-6 py-3 ${i > 0 ? "border-t border-line sm:border-l sm:border-t-0" : ""}`}>
+        ].map(([k, val]) => (
+          <div key={k} className="min-w-0 bg-[#0d1522] px-6 py-3">
             <dt className="text-faint">{k}</dt>
-            <dd className="mt-1 truncate text-paper">{val}</dd>
+            <dd className="mt-1 truncate text-paper" title={val}>
+              {val}
+            </dd>
           </div>
         ))}
       </dl>
@@ -202,18 +221,97 @@ function ResultCard({ result, ms, lang }: { result: ScanResult; ms: number; lang
   );
 }
 
+/** Links found in a pasted message; the selected one is shown in full below. */
+function LinkList({
+  links,
+  selected,
+  onSelect,
+  lang,
+}: {
+  links: ScanResult[];
+  selected: number;
+  onSelect: (i: number) => void;
+  lang: Lang;
+}) {
+  const t = STRINGS[lang];
+  return (
+    <section className="card-in mt-8 border border-line bg-deep/70">
+      <p className="border-b border-line px-6 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-faint">
+        {t.linksFound.replace("{n}", String(links.length))}
+      </p>
+      <ul>
+        {links.map((l, i) => {
+          const tone = TONE[l.verdict];
+          return (
+            <li key={l.url} className="border-b border-line last:border-b-0">
+              <button
+                type="button"
+                onClick={() => onSelect(i)}
+                aria-pressed={selected === i}
+                className={`line-in flex w-full items-center gap-4 px-6 py-3 text-left transition-colors hover:bg-paper/[0.03] ${
+                  selected === i ? "bg-paper/[0.04]" : ""
+                }`}
+                style={{ animationDelay: `${0.1 + i * 0.07}s` }}
+              >
+                <span className={`h-2 w-2 shrink-0 rounded-full ${tone.fill}`} />
+                <span className="min-w-0 flex-1 truncate font-mono text-sm text-paper">{l.url}</span>
+                <span className={`hidden font-mono text-[11px] uppercase tracking-[0.15em] sm:inline ${tone.text}`}>
+                  {t.verdict[l.verdict].label}
+                </span>
+                <span className={`w-8 text-right font-display text-lg font-semibold tabular-nums ${tone.text}`}>{l.risk_score}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
+function worstIndex(links: ScanResult[]) {
+  return links.reduce(
+    (best, l, i) =>
+      SEVERITY[l.verdict] > SEVERITY[links[best].verdict] ||
+      (SEVERITY[l.verdict] === SEVERITY[links[best].verdict] && l.risk_score > links[best].risk_score)
+        ? i
+        : best,
+    0,
+  );
+}
+
 export default function Home() {
   const [lang, setLang] = useState<Lang>("tr");
+  const [mode, setMode] = useState<Mode>("url");
   const [url, setUrl] = useState("");
+  const [text, setText] = useState("");
   const [pending, setPending] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<"invalid" | "failed" | null>(null);
+  const [slow, setSlow] = useState(false);
+  const [error, setError] = useState<"invalid" | "failed" | "noLinks" | null>(null);
   const [result, setResult] = useState<ScanResult | null>(null);
+  const [links, setLinks] = useState<ScanResult[] | null>(null);
+  const [selected, setSelected] = useState(0);
   const [ms, setMs] = useState(0);
   const [scanId, setScanId] = useState(0);
   const t = STRINGS[lang];
 
   useReveal();
+
+  // Wake the API as soon as the page opens: on the free plan it sleeps after
+  // 15 idle minutes, and waking takes ~50 s. By the time a link is pasted it
+  // is usually ready.
+  useEffect(() => {
+    fetch(`${API_URL}/api/health`).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      setSlow(false);
+      return;
+    }
+    const id = setTimeout(() => setSlow(true), SLOW_AFTER_MS);
+    return () => clearTimeout(id);
+  }, [loading]);
 
   useEffect(() => {
     let saved: string | null = null;
@@ -228,6 +326,17 @@ export default function Home() {
     document.documentElement.lang = lang;
   }, [lang]);
 
+  async function post<T>(path: string, body: object): Promise<T> {
+    const res = await fetch(`${API_URL}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+
   async function scan(target: string, scanLang: Lang = lang) {
     const value = target.trim();
     if (value.length < 3) {
@@ -237,15 +346,10 @@ export default function Home() {
     setPending(value);
     setLoading(true);
     setError(null);
+    setLinks(null);
     const started = performance.now();
     try {
-      const res = await fetch(`${API_URL}/api/scan/url`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: value, lang: scanLang }),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setResult(await res.json());
+      setResult(await post<ScanResult>("/api/scan/url", { url: value, lang: scanLang }));
       setMs(Math.round(performance.now() - started));
       setScanId((n) => n + 1);
     } catch {
@@ -256,26 +360,76 @@ export default function Home() {
     }
   }
 
+  async function scanMessage(message: string, scanLang: Lang = lang, keep = -1) {
+    const value = message.trim();
+    if (value.length < 3) {
+      setError("invalid");
+      return;
+    }
+    setPending("");
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    const started = performance.now();
+    try {
+      const data = await post<{ links: ScanResult[] }>("/api/scan/text", { text: value, lang: scanLang });
+      setMs(Math.round(performance.now() - started));
+      if (data.links.length === 0) {
+        setLinks(null);
+        setError("noLinks");
+        return;
+      }
+      setLinks(data.links);
+      setSelected(keep >= 0 && keep < data.links.length ? keep : worstIndex(data.links));
+      setScanId((n) => n + 1);
+    } catch {
+      setLinks(null);
+      setError("failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function changeMode(m: Mode) {
+    if (m === mode) return;
+    setMode(m);
+    setError(null);
+    setResult(null);
+    setLinks(null);
+  }
+
   function changeLang(l: Lang) {
     setLang(l);
     try {
       localStorage.setItem("lang", l);
     } catch {}
     // Re-run the last scan so the reasons come back in the new language.
-    if (result) scan(result.url, l);
+    if (mode === "url" && result) scan(result.url, l);
+    if (mode === "text" && links) scanMessage(text, l, selected);
   }
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
-    scan(url);
+    if (mode === "url") scan(url);
+    else scanMessage(text);
   }
 
-  const sceneState: SceneState = loading ? "checking" : result ? result.verdict : "idle";
+  const shown = mode === "text" ? (links?.[selected] ?? null) : result;
+  const worst = links ? links[worstIndex(links)] : null;
+  const sceneState: SceneState = loading
+    ? "checking"
+    : mode === "text" && worst
+      ? worst.verdict
+      : shown
+        ? shown.verdict
+        : "idle";
   const sceneHost = loading
-    ? hostOf(pending)
-    : result
-      ? hostOf(result.url)
-      : url.trim()
+    ? pending
+      ? hostOf(pending)
+      : "…"
+    : shown
+      ? hostOf(shown.url)
+      : mode === "url" && url.trim()
         ? hostOf(url.trim())
         : "ptt-kargo-teslimat.click";
 
@@ -338,26 +492,58 @@ export default function Home() {
             </p>
 
             <form onSubmit={onSubmit} className="rise-in mt-9" style={{ animationDelay: "0.24s" }}>
-              <div className="flex flex-col border border-line bg-deep/80 transition-colors focus-within:border-paper/30 sm:flex-row">
+              <div role="tablist" className="flex gap-6 font-mono text-xs uppercase tracking-[0.15em]">
+                {(["url", "text"] as const).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    role="tab"
+                    aria-selected={mode === m}
+                    onClick={() => changeMode(m)}
+                    className={`-mb-px border-b-2 pb-2 transition-colors ${
+                      mode === m ? "border-bobber text-paper" : "border-transparent text-faint hover:text-muted"
+                    }`}
+                  >
+                    {t.modes[m]}
+                  </button>
+                ))}
+              </div>
+              <div
+                className={`flex flex-col border border-line bg-deep/80 transition-colors focus-within:border-paper/30 ${
+                  mode === "url" ? "sm:flex-row" : ""
+                }`}
+              >
                 <label className="flex-1">
                   <span className="sr-only">{t.inputLabel}</span>
-                  <input
-                    type="text"
-                    inputMode="url"
-                    autoComplete="off"
-                    spellCheck={false}
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    placeholder={t.placeholder}
-                    className="w-full bg-transparent px-4 py-4 font-mono text-sm text-paper outline-none placeholder:text-faint"
-                  />
+                  {mode === "url" ? (
+                    <input
+                      type="text"
+                      inputMode="url"
+                      autoComplete="off"
+                      spellCheck={false}
+                      value={url}
+                      onChange={(e) => setUrl(e.target.value)}
+                      placeholder={t.placeholder}
+                      className="w-full bg-transparent px-4 py-4 font-mono text-sm text-paper outline-none placeholder:text-faint"
+                    />
+                  ) : (
+                    <textarea
+                      rows={4}
+                      maxLength={5000}
+                      spellCheck={false}
+                      value={text}
+                      onChange={(e) => setText(e.target.value)}
+                      placeholder={t.textPlaceholder}
+                      className="block w-full resize-y bg-transparent px-4 py-4 text-sm leading-relaxed text-paper outline-none placeholder:text-faint"
+                    />
+                  )}
                 </label>
                 <button
                   type="submit"
                   disabled={loading}
                   className="group flex items-center justify-center gap-2 bg-bobber px-6 py-4 text-sm font-semibold text-ink transition-colors hover:bg-[#ff7a52] disabled:cursor-wait"
                 >
-                  {loading ? t.scanning : t.scan}
+                  {loading ? t.scanning : mode === "url" ? t.scan : t.scanText}
                   <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                     <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
@@ -368,20 +554,40 @@ export default function Home() {
 
             <div className="rise-in mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-xs" style={{ animationDelay: "0.3s" }}>
               <span className="text-faint">{t.examples}:</span>
-              {EXAMPLES.map((ex) => (
+              {mode === "url" ? (
+                EXAMPLES.map((ex) => (
+                  <button
+                    key={ex}
+                    type="button"
+                    onClick={() => {
+                      setUrl(ex);
+                      scan(ex);
+                    }}
+                    className="max-w-full truncate text-muted underline decoration-faint underline-offset-4 transition-colors hover:text-paper hover:decoration-bobber"
+                  >
+                    {hostOf(ex)}
+                  </button>
+                ))
+              ) : (
                 <button
-                  key={ex}
                   type="button"
                   onClick={() => {
-                    setUrl(ex);
-                    scan(ex);
+                    setText(t.textExample);
+                    scanMessage(t.textExample);
                   }}
-                  className="max-w-full truncate text-muted underline decoration-faint underline-offset-4 transition-colors hover:text-paper hover:decoration-bobber"
+                  className="text-muted underline decoration-faint underline-offset-4 transition-colors hover:text-paper hover:decoration-bobber"
                 >
-                  {hostOf(ex)}
+                  {t.textExampleLabel}
                 </button>
-              ))}
+              )}
             </div>
+
+            {loading && slow && (
+              <p role="status" className="card-in mt-6 flex items-start gap-3 text-sm text-muted">
+                <span className="mt-1.5 h-2 w-2 shrink-0 animate-pulse rounded-full bg-sand" />
+                {t.slow}
+              </p>
+            )}
 
             <p className="rise-in mt-8 flex flex-wrap gap-x-3 gap-y-1 font-mono text-[11px] text-faint" style={{ animationDelay: "0.36s" }}>
               {[...t.proof, t.privacy].map((p, i) => (
@@ -398,7 +604,11 @@ export default function Home() {
               </p>
             )}
 
-            {result && <ResultCard key={scanId} result={result} ms={ms} lang={lang} />}
+            {mode === "text" && links && links.length > 1 && (
+              <LinkList key={`list-${scanId}`} links={links} selected={selected} onSelect={setSelected} lang={lang} />
+            )}
+
+            {shown && <ResultCard key={`${scanId}-${selected}`} result={shown} ms={ms} lang={lang} />}
           </div>
 
           <div className="hidden lg:block">

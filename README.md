@@ -2,6 +2,7 @@
 
 <h1 align="center">Kanca</h1>
 <p align="center"><b>See the hook before you bite.</b> · <i>Kancayı yemeden önce gör.</i></p>
+<p align="center"><a href="https://github.com/salihdinckann/kanca/actions/workflows/ci.yml"><img src="https://github.com/salihdinckann/kanca/actions/workflows/ci.yml/badge.svg" alt="CI"></a></p>
 
 **AI-powered phishing link scanner.** Paste a suspicious link from an SMS, email or WhatsApp message and get a risk score with plain-language reasons, in Turkish or English.
 
@@ -17,23 +18,31 @@
 - **Explainable results:** every score lists the signals that triggered it
 - **Bilingual:** Turkish and English UI and explanations
 - **Turkey-aware:** detects impersonation of Turkish banks, carriers and e-commerce brands (e.g. fake PTT cargo or Garanti BBVA links)
-- **Three-layer analysis:** domain reputation → ML model on the hostname → rule-based path signals
+- **Paste a whole message:** links are extracted from SMS, WhatsApp or email text and checked one by one
+- **Threat intelligence:** Google Safe Browsing lookup and domain age from RDAP ("registered 4 days ago")
+- **Four-layer analysis:** reputation and threat lists → ML model on the hostname → domain age → rule-based path signals
 
 ## How it works
 
 ```
-URL ──► Domain reputation ──known──► safe
+Message ──► link extraction ──► URL(s)
+URL ──► Google Safe Browsing ──listed──► dangerous
+    ──► Reputation (allowlist + Tranco top 10k) ──known──► safe
             │ unknown
             ▼
      Hostname features ──► Gradient boosting model ──► P(phishing)
-            +                                               │
-     Path / scheme rules (@, //, brand in path, no HTTPS) ──┴──► risk score + reasons
+            +  domain age (RDAP): < 30 days ↑, > 2 years ↓
+            +  path / scheme rules (@, //, brand in path, no HTTPS)
+            ▼
+     risk score + reasons   (no concrete reason → capped at "suspicious")
 ```
 
 | Layer | What it does |
 |---|---|
-| Reputation | Allowlist of well-known global and Turkish domains, with multi-part suffix handling (`.com.tr`, `.co.uk`). Open hosting platforms are intentionally excluded. |
+| Threat list | Google Safe Browsing v4 lookup (optional, enabled with `SAFE_BROWSING_API_KEY`). |
+| Reputation | Hand-picked global and Turkish domains plus the [Tranco](https://tranco-list.eu/) top 10k, with multi-part suffix handling (`.com.tr`, `.co.uk`). Hosting platforms, file storage and URL shorteners are removed, since phishing kits live there too. |
 | ML model | `HistGradientBoostingClassifier` on 16 lexical hostname features: length, digits, subdomains, entropy, suspicious TLD, brand-in-subdomain, punycode, and more. |
+| Domain age | Registration date from RDAP, cached for a day. Brand-new domains raise the score; long-established ones lower it. |
 | Rules | Signals outside the hostname that the model never sees, such as `@` tricks, embedded redirects and phishing keywords in the path. |
 
 ## The interesting part: catching a data leak
@@ -67,7 +76,8 @@ The score is lower, but the model now behaves correctly on real-world links.
 
 ## Tech stack
 
-- **Backend:** Python, FastAPI, scikit-learn, pandas
+- **Backend:** Python, FastAPI, scikit-learn, pandas, httpx (async RDAP / Safe Browsing)
+- **Tests:** pytest (26 tests, network lookups faked), GitHub Actions CI
 - **Frontend:** Next.js 15, React 19, TypeScript, Tailwind CSS
 - **Deploy:** Render (API) and Vercel (web)
 
@@ -87,7 +97,11 @@ npm install
 npm run dev                   # http://localhost:3000
 ```
 
-Retrain the model: download the PhiUSIIL CSV into `ml/data/`, then run `python ml/train.py`.
+Run the tests: `pip install -r requirements-dev.txt && pytest` (inside `backend/`).
+
+Retrain the model: download the PhiUSIIL CSV into `ml/data/`, then run `python ml/train.py`. Rebuild the popularity list with `python ml/build_tranco.py top-1m.csv <list-id>`.
+
+Optional: set `SAFE_BROWSING_API_KEY` to enable Google Safe Browsing lookups.
 
 ### API
 
@@ -101,14 +115,26 @@ POST /api/scan/url
   "risk_score": 100,
   "verdict": "dangerous",
   "reasons": ["The domain extension (TLD) is commonly abused in scams.", "..."],
-  "engine": "ml"
+  "engine": "ml",
+  "domain_age_days": null,
+  "safe_browsing": "clean"
 }
+```
+
+```http
+POST /api/scan/text
+{ "text": "Kargonuz bekliyor. Odeme: ptt-kargo-teslimat.click/odeme", "lang": "tr" }
+→ { "links": [ { ...same shape as above... } ] }
 ```
 
 ## Roadmap
 
-- [ ] Domain age (WHOIS) and SSL certificate checks
-- [ ] VirusTotal and Google Safe Browsing lookups
+- [x] Domain age (RDAP)
+- [x] Google Safe Browsing lookup
+- [x] Link extraction from SMS / email text
+- [x] Tranco top-10k reputation
+- [x] Tests and CI
+- [ ] SSL certificate checks
 - [ ] LLM-generated explanations for SMS and email text
 - [ ] Browser extension
 

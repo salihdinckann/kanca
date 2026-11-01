@@ -111,7 +111,8 @@ def extract_features(url: str) -> dict:
         "num_special": sum(raw.count(ch) for ch in "@~%=&_!$*,;"),
         "has_ip": int(_is_ip(host)),
         "has_at": int("@" in raw),
-        "has_https": int(parsed.scheme == "https"),
+        # A bare link from an SMS ("site.com/x") has no scheme: we can't tell, so don't flag it.
+        "has_https": int(parsed.scheme == "https" or not re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*://", raw)),
         "has_double_slash_redirect": int("//" in raw[raw.find("://") + 3:] if "://" in raw else "//" in raw),
         "has_punycode": int("xn--" in host),
         "is_shortener": int(registered in SHORTENERS),
@@ -209,6 +210,16 @@ REASONS = {
                 "{domain} is a free hosting platform where anyone can publish a site. Make sure you trust the owner."),
     "model": ("Makine öğrenmesi modeli alan adının yapısını (uzunluk, alt alan adları, karakterler) olağan dışı buldu.",
               "The machine learning model found the domain's structure (length, subdomains, characters) unusual."),
+    "popular": ("{domain}, dünyanın en çok ziyaret edilen 10.000 sitesi arasında (Tranco listesi).",
+                "{domain} is among the 10,000 most visited sites in the world (Tranco list)."),
+    "safe_browsing": ("Google Safe Browsing bu linki tehlikeli siteler listesinde gösteriyor.",
+                      "Google Safe Browsing lists this link as dangerous."),
+    "new_domain": ("Alan adı sadece {days} gün önce alınmış; oltalama siteleri genelde çok yeni alan adları kullanır.",
+                   "The domain was registered only {days} days ago; phishing sites usually use brand-new domains."),
+    "young_domain": ("Alan adı yaklaşık {months} ay önce alınmış; görece yeni bir alan adı.",
+                     "The domain was registered about {months} months ago; it is relatively new."),
+    "old_domain": ("Alan adı {years} yıldır kayıtlı; köklü alan adları daha düşük risk taşır.",
+                   "The domain has been registered for {years} years; established domains carry less risk."),
 }
 
 
