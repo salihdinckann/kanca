@@ -1,0 +1,183 @@
+<!doctype html>
+<!-- Chrome Web Store images. Rendered by store/render.sh: assets.html#shot1 … #marquee. -->
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono&family=Unbounded:wght@500;600;700&display=block" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #0a1019; --deep: #0e1724; --paper: #ece6d9; --muted: #8b93a3; --faint: #4c5566;
+    --line: rgba(236, 230, 217, 0.1); --bobber: #ff5b2e; --sea: #4fd1b8; --sand: #f2b84b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: radial-gradient(1200px 700px at 85% -10%, rgba(79, 209, 184, 0.10), transparent 60%),
+                radial-gradient(900px 600px at -10% 110%, rgba(255, 91, 46, 0.10), transparent 60%), var(--ink);
+    color: var(--paper); font-family: Geist, system-ui, sans-serif; overflow: hidden;
+  }
+  .scene { display: none; position: relative; width: 1280px; height: 800px; }
+  .display { font-family: Unbounded, sans-serif; letter-spacing: -0.03em; }
+  .mono { font-family: "Geist Mono", monospace; }
+  .kicker { font: 13px "Geist Mono", monospace; letter-spacing: 0.22em; text-transform: uppercase; color: var(--sea); }
+  .copy { position: absolute; left: 80px; top: 0; bottom: 0; width: 470px; display: flex; flex-direction: column; justify-content: center; }
+  .copy h1 { margin-top: 22px; font-size: 54px; line-height: 1.05; font-weight: 600; }
+  .copy h1 em { font-style: normal; color: var(--bobber); }
+  .copy p { margin-top: 22px; font-size: 19px; line-height: 1.55; color: var(--muted); }
+  .copy ul { margin-top: 28px; list-style: none; }
+  .copy li { position: relative; padding: 7px 0 7px 22px; font-size: 16px; color: var(--paper); }
+  .copy li::before { content: ""; position: absolute; left: 0; top: 16px; width: 8px; height: 8px; background: var(--bobber); }
+  .brand { display: inline-flex; align-items: center; gap: 12px; }
+  .brand svg { width: 40px; height: 40px; }
+  .brand span { font: 600 26px Unbounded, sans-serif; letter-spacing: -0.03em; }
+
+  /* fake browser */
+  .browser { position: absolute; right: 60px; top: 70px; width: 640px; height: 660px; background: #121c2b; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,0.45); }
+  .bar { display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 14px; background: #0c1520; border-bottom: 1px solid var(--line); }
+  .dots { display: flex; gap: 7px; } .dots i { width: 11px; height: 11px; border-radius: 50%; background: #2a3546; }
+  .addr { flex: 1; height: 32px; display: flex; align-items: center; gap: 8px; padding: 0 12px; background: var(--deep); border-radius: 16px; font: 13px "Geist Mono", monospace; color: var(--muted); white-space: nowrap; overflow: hidden; }
+  .addr .warn { color: var(--bobber); }
+  .tool { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; outline: 2px solid var(--bobber); outline-offset: 2px; }
+  .tool svg { width: 22px; height: 22px; }
+  .page { padding: 34px; }
+  .sk { height: 14px; margin-bottom: 14px; background: rgba(236,230,217,0.06); border-radius: 4px; }
+  .popup { position: absolute; right: 10px; top: 58px; width: 380px; height: 590px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.55); background: var(--ink); }
+  .popup iframe { width: 380px; height: 590px; border: 0; display: block; }
+
+  /* message + context menu */
+  .msg { position: absolute; left: 600px; top: 120px; width: 600px; padding: 30px 32px; background: #121c2b; border: 1px solid var(--line); border-radius: 14px; }
+  .msg .from { font: 12px "Geist Mono", monospace; color: var(--faint); letter-spacing: 0.1em; text-transform: uppercase; }
+  .msg .text { margin-top: 12px; font-size: 18px; line-height: 1.6; color: var(--paper); }
+  .msg .link { color: #7cb7ff; text-decoration: underline; text-underline-offset: 3px; background: rgba(124,183,255,0.12); }
+  .menu { position: absolute; left: 846px; top: 272px; width: 290px; padding: 6px 0; background: #1b2636; border: 1px solid rgba(236,230,217,0.14); border-radius: 8px; box-shadow: 0 24px 50px rgba(0,0,0,0.5); font-size: 14px; }
+  .menu div { display: flex; align-items: center; gap: 10px; padding: 8px 16px; color: #c9cfd9; }
+  .menu hr { border: 0; border-top: 1px solid var(--line); margin: 5px 0; }
+  .menu .hi { background: rgba(255,91,46,0.16); color: var(--paper); }
+  .menu .hi svg { width: 18px; height: 18px; }
+  .menu .sp { width: 18px; }
+  .cursor { position: absolute; left: 836px; top: 252px; width: 0; height: 0; border-left: 9px solid transparent; border-right: 9px solid transparent; border-bottom: 22px solid #fff; transform: rotate(-30deg); filter: drop-shadow(0 2px 2px rgba(0,0,0,.6)); }
+  .popwin { position: absolute; left: 640px; top: 420px; width: 380px; height: 350px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.55); }
+  .popwin iframe { width: 380px; height: 590px; border: 0; }
+
+  /* small tile + marquee */
+  #tile { width: 440px; height: 280px; }
+  #tile .inner { position: absolute; inset: 0; padding: 38px 40px; display: flex; flex-direction: column; justify-content: space-between; }
+  #tile h1 { font-size: 30px; line-height: 1.1; font-weight: 600; }
+  #tile h1 em { font-style: normal; color: var(--bobber); }
+  #tile p { font: 12px "Geist Mono", monospace; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
+  #marquee { width: 1400px; height: 560px; }
+  #marquee .copy { left: 100px; width: 640px; }
+  #marquee .copy h1 { font-size: 64px; }
+  #marquee .popup { right: 120px; top: 0; height: 560px; border-radius: 0 0 10px 10px; border-top: 0; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="tile-g" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ff7a4d"/><stop offset="1" stop-color="#e5401a"/></linearGradient>
+    <symbol id="mark" viewBox="0 0 32 32">
+      <rect width="32" height="32" rx="8" fill="url(#tile-g)"/>
+      <g fill="none" stroke="#0a1019" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="19" cy="7.5" r="2.2" stroke-width="2"/><path d="M19 9.7V18.5a5.5 5.5 0 0 1-11 0V15" stroke-width="2.6"/><path d="M8 15l3.2 2.6" stroke-width="2.2"/>
+      </g>
+      <circle cx="19" cy="7.5" r="4.6" fill="none" stroke="#0a1019" stroke-opacity="0.3" stroke-width="1"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- 1: toolbar scan, Turkish -->
+<section class="scene" id="shot1">
+  <div class="copy">
+    <span class="brand"><svg><use href="#mark"/></svg><span>kanca</span></span>
+    <h1 class="display">Kancayı yemeden <em>önce gör.</em></h1>
+    <p>Tek tıkla açık sayfanın oltalama riskini öğren: 0–100 risk puanı, karar ve nedenleri.</p>
+    <ul><li>Yapay zekâ modeli + Google Safe Browsing</li><li>Alan adı yaşı ve marka taklidi kontrolü</li><li>Türkçe ve İngilizce</li></ul>
+  </div>
+  <div class="browser">
+    <div class="bar"><span class="dots"><i></i><i></i><i></i></span>
+      <span class="addr"><span class="warn">⚠ Güvenli değil</span> ptt-kargo-teslimat.click/odeme/giris</span>
+      <span class="tool"><svg><use href="#mark"/></svg></span></div>
+    <div class="page"><div class="sk" style="width:40%;height:22px"></div><div class="sk" style="width:85%"></div><div class="sk" style="width:70%"></div><div class="sk" style="width:55%;height:40px;margin-top:24px"></div><div class="sk" style="width:55%;height:40px"></div></div>
+    <div class="popup"><iframe src="popup-demo.html#dangerous-tr"></iframe></div>
+  </div>
+</section>
+
+<!-- 2: right-click a link, Turkish -->
+<section class="scene" id="shot2">
+  <div class="copy">
+    <span class="kicker">Sağ tık → Kanca</span>
+    <h1 class="display">Linke tıklamadan <em>önce sor.</em></h1>
+    <p>E-postada, WhatsApp Web'de ya da herhangi bir sayfada şüpheli bir linke sağ tıkla. Kanca, linki açmadan tarar.</p>
+    <ul><li>Link açılmaz, sayfa indirilmez</li><li>Sadece sen tıklayınca taranır</li></ul>
+  </div>
+  <div class="msg">
+    <p class="from">Gelen mesaj</p>
+    <p class="text">Sayın müşterimiz, kargonuz adres eksikliği nedeniyle teslim edilemedi. 24 saat içinde güncellemezseniz iade edilecektir:<br /><span class="link">ptt-kargo-teslimat.click/odeme</span></p>
+  </div>
+  <div class="cursor"></div>
+  <div class="menu">
+    <div><span class="sp"></span>Bağlantıyı yeni sekmede aç</div>
+    <div><span class="sp"></span>Bağlantı adresini kopyala</div>
+    <hr />
+    <div class="hi"><svg><use href="#mark"/></svg>Linki Kanca ile tara</div>
+  </div>
+  <div class="popwin"><iframe src="popup-demo.html#dangerous-tr"></iframe></div>
+</section>
+
+<!-- 3: Safe Browsing match, English -->
+<section class="scene" id="shot3">
+  <div class="copy">
+    <span class="brand"><svg><use href="#mark"/></svg><span>kanca</span></span>
+    <h1 class="display">Know before <em>you click.</em></h1>
+    <p>Kanca checks the page you're on against Google Safe Browsing, a machine-learning model and the domain's age, and tells you why.</p>
+    <ul><li>Explainable results, not just a score</li><li>Nothing is scanned without your click</li><li>Free and open source</li></ul>
+  </div>
+  <div class="browser">
+    <div class="bar"><span class="dots"><i></i><i></i><i></i></span>
+      <span class="addr">testsafebrowsing.appspot.com/s/phishing.html</span>
+      <span class="tool"><svg><use href="#mark"/></svg></span></div>
+    <div class="page"><div class="sk" style="width:50%;height:22px"></div><div class="sk" style="width:80%"></div><div class="sk" style="width:65%"></div></div>
+    <div class="popup" style="height:440px"><iframe src="popup-demo.html#sb-en"></iframe></div>
+  </div>
+</section>
+
+<!-- 4: safe result, English -->
+<section class="scene" id="shot4">
+  <div class="copy">
+    <span class="brand"><svg><use href="#mark"/></svg><span>kanca</span></span>
+    <h1 class="display">Clean sites <em>stay quiet.</em></h1>
+    <p>Well-known domains and the world's 10,000 most visited sites are recognized instantly, so you only get warned when it matters.</p>
+  </div>
+  <div class="browser">
+    <div class="bar"><span class="dots"><i></i><i></i><i></i></span>
+      <span class="addr">github.com/salihdinckann/kanca</span>
+      <span class="tool"><svg><use href="#mark"/></svg></span></div>
+    <div class="page"><div class="sk" style="width:35%;height:22px"></div><div class="sk" style="width:90%"></div><div class="sk" style="width:75%"></div><div class="sk" style="width:82%"></div></div>
+    <div class="popup" style="height:440px"><iframe src="popup-demo.html#safe-en"></iframe></div>
+  </div>
+</section>
+
+<!-- small promo tile 440x280 -->
+<section class="scene" id="tile">
+  <div class="inner">
+    <span class="brand"><svg><use href="#mark"/></svg><span>kanca</span></span>
+    <div><h1 class="display">Kancayı yemeden <em>önce gör.</em></h1><p style="margin-top:12px">Phishing link scanner</p></div>
+  </div>
+</section>
+
+<!-- marquee 1400x560 -->
+<section class="scene" id="marquee">
+  <div class="copy">
+    <span class="brand"><svg><use href="#mark"/></svg><span>kanca</span></span>
+    <h1 class="display">Kancayı yemeden <em>önce gör.</em></h1>
+    <p>Açık sayfayı ya da sağ tıkladığın linki saniyeler içinde oltalama riskine karşı tara.</p>
+  </div>
+  <div class="popup"><iframe src="popup-demo.html#dangerous-tr"></iframe></div>
+</section>
+
+<script>
+  const id = location.hash.slice(1) || "shot1";
+  document.getElementById(id).style.display = "block";
+</script>
+</body>
+</html>

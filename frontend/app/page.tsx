@@ -438,6 +438,7 @@ export default function Home() {
     OWNER.github && { href: OWNER.github, label: "GitHub" },
     OWNER.linkedin && { href: OWNER.linkedin, label: "LinkedIn" },
     OWNER.email && { href: `mailto:${OWNER.email}`, label: OWNER.email },
+    { href: "/privacy", label: t.privacyPolicy },
   ].filter(Boolean) as { href: string; label: string }[];
 
   return (
@@ -720,7 +721,7 @@ export default function Home() {
                   <li key={l.href}>
                     <a
                       href={l.href}
-                      target={l.href.startsWith("mailto:") ? undefined : "_blank"}
+                      target={l.href.startsWith("http") ? "_blank" : undefined}
                       rel="noopener noreferrer"
                       className="text-muted underline decoration-transparent underline-offset-4 transition-colors hover:text-paper hover:decoration-bobber"
                     >

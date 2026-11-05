@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <title>Kanca</title>
+  <link rel="stylesheet" href="../extension/popup.css" />
+<style>#result{animation:none} .meter span{transition:none}</style>
+</head>
+<body>
+  <header>
+    <a class="brand" href="https://kanca.salihdinckan.com" target="_blank" rel="noopener">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <defs>
+          <linearGradient id="tile" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#ff7a4d" />
+            <stop offset="1" stop-color="#e5401a" />
+          </linearGradient>
+        </defs>
+        <rect width="32" height="32" rx="8" fill="url(#tile)" />
+        <g fill="none" stroke="#0a1019" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="19" cy="7.5" r="2.2" stroke-width="2" />
+          <path d="M19 9.7V18.5a5.5 5.5 0 0 1-11 0V15" stroke-width="2.6" />
+          <path d="M8 15l3.2 2.6" stroke-width="2.2" />
+        </g>
+        <circle cx="19" cy="7.5" r="4.6" fill="none" stroke="#0a1019" stroke-opacity="0.3" stroke-width="1" />
+      </svg>
+      <span>kanca</span>
+    </a>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="tr">tr</button>
+      <span>/</span>
+      <button type="button" data-lang="en">en</button>
+    </div>
+  </header>
+
+  <main>
+    <form id="form">
+      <input id="url" type="text" autocomplete="off" spellcheck="false" />
+      <button id="scan" type="submit"></button>
+    </form>
+
+    <p id="status" class="status" hidden></p>
+
+    <section id="result" hidden>
+      <div class="score">
+        <span id="score" class="num"></span>
+        <div>
+          <p id="label" class="label"></p>
+          <p id="title" class="title"></p>
+        </div>
+      </div>
+      <div class="meter"><span id="bar"></span></div>
+      <p id="desc" class="desc"></p>
+
+      <dl class="meta">
+        <div><dt id="domainLabel"></dt><dd id="domain"></dd></div>
+        <div><dt id="methodLabel"></dt><dd id="method"></dd></div>
+      </dl>
+
+      <h2 id="signalsLabel"></h2>
+      <ul id="reasons"></ul>
+    </section>
+  </main>
+
+  <footer>
+    <a id="site" href="https://kanca.salihdinckan.com" target="_blank" rel="noopener"></a>
+  </footer>
+
+  <script>
+  // Demo data for the store screenshots: the popup runs unchanged, with chrome.* and fetch stubbed.
+  const [scenario, demoLang] = (location.hash.slice(1) || "dangerous-tr").split("-");
+  const DEMO = {
+    dangerous: {
+      url: "http://ptt-kargo-teslimat.click/odeme/giris",
+      res: { risk_score: 96, verdict: "dangerous", engine: "ml", domain_age_days: 3,
+        reasons: {
+          tr: ["Alan adı sadece 3 gün önce alınmış; oltalama siteleri genelde çok yeni alan adları kullanır.",
+               "Bilinen bir marka adı, asıl alan adında değil alt alan adında veya yolda geçiyor.",
+               "Uzantı (TLD), dolandırıcılıkta sık kullanılan uzantılardan biri.",
+               "Bağlantı şifreli değil (HTTPS yok)."],
+          en: ["The domain was registered only 3 days ago; phishing sites usually use brand-new domains.",
+               "A well-known brand name appears in the subdomain or path, not in the real domain.",
+               "The domain extension (TLD) is commonly abused in scams.",
+               "The connection is not encrypted (no HTTPS)."] } } },
+    safe: {
+      url: "https://github.com/salihdinckann/kanca",
+      res: { risk_score: 2, verdict: "safe", engine: "reputation",
+        reasons: { tr: ["github.com bilinen ve güvenilir bir alan adı."], en: ["github.com is a well-known, trusted domain."] } } },
+    sb: {
+      url: "http://testsafebrowsing.appspot.com/s/phishing.html",
+      res: { risk_score: 100, verdict: "dangerous", engine: "safe_browsing",
+        reasons: { tr: ["Google Safe Browsing bu linki tehlikeli siteler listesinde gösteriyor."],
+                   en: ["Google Safe Browsing lists this link as dangerous."] } } },
+  }[scenario];
+  window.chrome = {
+    tabs: { query: async () => [{ url: DEMO.url }] },
+    storage: { local: { get: async () => ({ lang: demoLang }), set: async () => {} } },
+  };
+  window.fetch = async (_u, o) => {
+    const { url, lang } = JSON.parse(o.body);
+    return { ok: true, json: async () => ({ ...DEMO.res, url, reasons: DEMO.res.reasons[lang] }) };
+  };
+</script>
+<script src="../extension/popup.js"></script>
+</body>
+</html>

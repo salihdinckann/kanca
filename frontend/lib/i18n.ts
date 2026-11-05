@@ -88,6 +88,7 @@ export const STRINGS = {
     builtBy: "Geliştiren",
     role: "Bilgisayar Mühendisliği Öğrencisi",
     contact: "İletişim",
+    privacyPolicy: "Gizlilik politikası",
   },
   en: {
     nav: { how: "How it works", model: "Model", source: "Source code" },
@@ -173,5 +174,6 @@ export const STRINGS = {
     builtBy: "Built by",
     role: "Computer Engineering Student",
     contact: "Contact",
+    privacyPolicy: "Privacy policy",
   },
 } as const;
