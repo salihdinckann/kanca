@@ -30,7 +30,7 @@ http: httpx.AsyncClient | None = None
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     global http
-    http = httpx.AsyncClient(headers={"User-Agent": "Kanca/1.1 (+https://kanca-inky.vercel.app)"})
+    http = httpx.AsyncClient(headers={"User-Agent": "Kanca/1.1 (+https://kanca.salihdinckan.com)"})
     yield
     await http.aclose()
 
@@ -38,7 +38,7 @@ async def lifespan(_: FastAPI):
 app = FastAPI(title="Kanca API", version="1.1.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    # Comma-separated list in production, e.g. "https://kanca.vercel.app"
+    # Comma-separated list in production, e.g. "https://kanca.salihdinckan.com"
     allow_origins=os.getenv("ALLOWED_ORIGINS", "*").split(","),
     allow_methods=["*"],
     allow_headers=["*"],

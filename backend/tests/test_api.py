@@ -116,7 +116,9 @@ def test_suspicious_subdomain_of_old_domain_gets_no_benefit(client, intel):
 
 
 def test_own_site_is_trusted(client, intel):
-    assert scan(client, "https://kanca-inky.vercel.app")["verdict"] == "safe"
+    intel["age"] = 1
+    for url in ("https://kanca.salihdinckan.com", "https://kanca-inky.vercel.app"):
+        assert scan(client, url)["verdict"] == "safe"
 
 
 def test_text_scan_extracts_and_scores_each_link(client, intel):

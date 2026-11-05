@@ -26,6 +26,8 @@ KNOWN_DOMAINS = {
     "yemeksepeti.com", "getir.com", "yurticikargo.com", "araskargo.com.tr",
     "mngkargo.com.tr", "thy.com", "turkishairlines.com", "osym.gov.tr", "meb.gov.tr",
     "eksisozluk.com", "hurriyet.com.tr", "sozcu.com.tr", "ntv.com.tr",
+    # Kanca's own domain (new, so domain age would otherwise count against it)
+    "salihdinckan.com",
 }
 
 

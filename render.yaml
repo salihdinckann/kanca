@@ -11,4 +11,4 @@ services:
       - key: PYTHON_VERSION
         value: 3.13.7
       - key: ALLOWED_ORIGINS
-        sync: false # set to your Vercel URL, e.g. https://kanca.vercel.app
+        sync: false # set to the site URL(s), e.g. https://kanca.salihdinckan.com
