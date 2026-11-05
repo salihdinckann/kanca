@@ -1,0 +1,6 @@
+{
+  "name": { "message": "Kanca – Phishing Link Scanner" },
+  "description": { "message": "Checks the page you're on, or any link you right-click, for phishing risk." },
+  "actionTitle": { "message": "Scan this page with Kanca" },
+  "contextMenu": { "message": "Scan link with Kanca" }
+}

@@ -1,0 +1,6 @@
+{
+  "name": { "message": "Kanca – Phishing Link Tarayıcı" },
+  "description": { "message": "Açtığın sayfayı ya da sağ tıkladığın linki oltalama (phishing) riskine karşı tarar." },
+  "actionTitle": { "message": "Bu sayfayı Kanca ile tara" },
+  "contextMenu": { "message": "Linki Kanca ile tara" }
+}

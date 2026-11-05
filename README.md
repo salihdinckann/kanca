@@ -20,6 +20,7 @@
 - **Turkey-aware:** detects impersonation of Turkish banks, carriers and e-commerce brands (e.g. fake PTT cargo or Garanti BBVA links)
 - **Paste a whole message:** links are extracted from SMS, WhatsApp or email text and checked one by one
 - **Threat intelligence:** Google Safe Browsing lookup and domain age from RDAP ("registered 4 days ago")
+- **Browser extension:** scan the open page from the toolbar, or right-click any link → *Scan link with Kanca*
 - **Four-layer analysis:** reputation and threat lists → ML model on the hostname → domain age → rule-based path signals
 
 ## How it works
@@ -146,6 +147,19 @@ POST /api/scan/text
 → { "links": [ { ...same shape as above... } ] }
 ```
 
+## Browser extension
+
+`extension/` is a Manifest V3 Chrome extension (also works in Edge and Brave) that uses the same API.
+
+- **Toolbar button:** scans the page you're on.
+- **Right-click a link → Scan link with Kanca:** checks a link before you open it.
+- **Privacy:** nothing is scanned automatically. A URL only leaves the browser when you click.
+
+**Install (developer mode):**
+1. Download this repository (Code → Download ZIP) and unzip it.
+2. Open `chrome://extensions` and turn on **Developer mode** (top right).
+3. Click **Load unpacked** and select the `extension` folder.
+
 ## Roadmap
 
 - [x] Domain age (RDAP)
@@ -153,9 +167,9 @@ POST /api/scan/text
 - [x] Link extraction from SMS / email text
 - [x] Tranco top-10k reputation
 - [x] Tests and CI
+- [x] Chrome extension
 - [ ] SSL certificate checks
 - [ ] LLM-generated explanations for SMS and email text
-- [ ] Browser extension
 
 ## Author
 

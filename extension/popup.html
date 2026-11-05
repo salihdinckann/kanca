@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <title>Kanca</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header>
+    <a class="brand" href="https://kanca.salihdinckan.com" target="_blank" rel="noopener">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <defs>
+          <linearGradient id="tile" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#ff7a4d" />
+            <stop offset="1" stop-color="#e5401a" />
+          </linearGradient>
+        </defs>
+        <rect width="32" height="32" rx="8" fill="url(#tile)" />
+        <g fill="none" stroke="#0a1019" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="19" cy="7.5" r="2.2" stroke-width="2" />
+          <path d="M19 9.7V18.5a5.5 5.5 0 0 1-11 0V15" stroke-width="2.6" />
+          <path d="M8 15l3.2 2.6" stroke-width="2.2" />
+        </g>
+        <circle cx="19" cy="7.5" r="4.6" fill="none" stroke="#0a1019" stroke-opacity="0.3" stroke-width="1" />
+      </svg>
+      <span>kanca</span>
+    </a>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="tr">tr</button>
+      <span>/</span>
+      <button type="button" data-lang="en">en</button>
+    </div>
+  </header>
+
+  <main>
+    <form id="form">
+      <input id="url" type="text" autocomplete="off" spellcheck="false" />
+      <button id="scan" type="submit"></button>
+    </form>
+
+    <p id="status" class="status" hidden></p>
+
+    <section id="result" hidden>
+      <div class="score">
+        <span id="score" class="num"></span>
+        <div>
+          <p id="label" class="label"></p>
+          <p id="title" class="title"></p>
+        </div>
+      </div>
+      <div class="meter"><span id="bar"></span></div>
+      <p id="desc" class="desc"></p>
+
+      <dl class="meta">
+        <div><dt id="domainLabel"></dt><dd id="domain"></dd></div>
+        <div><dt id="methodLabel"></dt><dd id="method"></dd></div>
+      </dl>
+
+      <h2 id="signalsLabel"></h2>
+      <ul id="reasons"></ul>
+    </section>
+  </main>
+
+  <footer>
+    <a id="site" href="https://kanca.salihdinckan.com" target="_blank" rel="noopener"></a>
+  </footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>
