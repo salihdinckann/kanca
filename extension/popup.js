@@ -161,12 +161,13 @@ async function init() {
     scan($("url").value);
   });
 
-  // From the context menu the link arrives as ?url=; otherwise use the open tab.
+  // From the context menu the link arrives as ?url= (a selected link may have no
+  // scheme, which the API accepts); otherwise use the open tab.
   const fromMenu = new URLSearchParams(location.search).get("url");
   if (fromMenu) document.body.classList.add("window");
   const target = fromMenu ?? (await currentTabUrl());
 
-  if (/^https?:\/\//i.test(target)) {
+  if (fromMenu || /^https?:\/\//i.test(target)) {
     $("url").value = target;
     scan(target);
   } else {

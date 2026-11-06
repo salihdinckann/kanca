@@ -4,7 +4,7 @@ Everything to paste into the Chrome Web Store developer dashboard.
 Images are in `store/out/` (re-render with `bash store/render.sh`), the package is `store/out/kanca-extension-<version>.zip`.
 
 ## Package
-`kanca-extension-1.0.0.zip`
+`kanca-extension-1.0.1.zip`
 
 ## Store listing
 

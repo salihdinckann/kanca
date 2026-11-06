@@ -1,6 +1,20 @@
 {
-  "name": { "message": "Kanca – Phishing Link Scanner" },
-  "description": { "message": "Checks the page you're on, or any link you right-click, for phishing risk." },
-  "actionTitle": { "message": "Scan this page with Kanca" },
-  "contextMenu": { "message": "Scan link with Kanca" }
+  "name": {
+    "message": "Kanca – Phishing Link Scanner"
+  },
+  "description": {
+    "message": "Checks the page you're on, or any link you right-click, for phishing risk."
+  },
+  "actionTitle": {
+    "message": "Scan this page with Kanca"
+  },
+  "contextMenu": {
+    "message": "Scan link with Kanca"
+  },
+  "contextMenuSelection": {
+    "message": "Scan selected link with Kanca"
+  },
+  "contextMenuPage": {
+    "message": "Scan this page with Kanca"
+  }
 }
