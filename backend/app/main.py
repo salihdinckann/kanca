@@ -19,7 +19,7 @@ from .features import (
     reason, split_host,
 )
 from .intel import domain_age_days, safe_browsing_enabled, safe_browsing_match
-from .reputation import KNOWN_HOSTS, is_hosting_platform, is_known, is_popular
+from .reputation import KNOWN_HOSTS, is_hosting_platform, is_known, is_popular, official_domain
 from .textscan import extract_links
 
 MODEL_PATH = Path(__file__).resolve().parent.parent / "model.joblib"
@@ -142,7 +142,8 @@ async def analyze(url: str, lang: str) -> UrlScanResponse:
     feats = extract_features(url)
     host = host_of(url)
     _, registered = split_host(host)
-    trusted = is_known(host, registered)
+    official = official_domain(host)
+    trusted = is_known(host, registered) or official is not None
     popular = not trusted and is_popular(registered)
     hosted = is_hosting_platform(registered)
 
@@ -162,10 +163,13 @@ async def analyze(url: str, lang: str) -> UrlScanResponse:
         )
 
     if trusted or popular:
-        domain = host if host in KNOWN_HOSTS else registered
+        if official and not is_known(host, registered):
+            key, domain = "official", official
+        else:
+            key, domain = ("known" if trusted else "popular"), (host if host in KNOWN_HOSTS else registered)
         return UrlScanResponse(
             url=url, risk_score=2, verdict="safe", engine="reputation",
-            reasons=[reason("known" if trusted else "popular", lang, domain=domain)],
+            reasons=[reason(key, lang, domain=domain)],
             safe_browsing=sb_state,
         )
 

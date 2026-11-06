@@ -61,6 +61,23 @@ POPULAR_DOMAINS = (
 )
 
 
+# Suffixes only government, education and military bodies can register, so a
+# scammer cannot own one. Safe Browsing still runs first for hacked sites.
+OFFICIAL_SUFFIXES = (
+    "gov.tr", "edu.tr", "k12.tr", "mil.tr", "tsk.tr", "pol.tr", "bel.tr",
+    "gov", "edu", "mil",
+)
+
+
+def official_domain(host: str) -> str | None:
+    """'tybsng.tubitak.gov.tr' -> 'tubitak.gov.tr'; None if not an official suffix."""
+    for suffix in OFFICIAL_SUFFIXES:
+        if host.endswith("." + suffix):
+            name = host[: -len(suffix) - 1].rsplit(".", 1)[-1]
+            return f"{name}.{suffix}"
+    return None
+
+
 def is_known(host: str, registered_domain: str) -> bool:
     return host in KNOWN_HOSTS or registered_domain in KNOWN_DOMAINS
 

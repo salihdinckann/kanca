@@ -115,6 +115,17 @@ def test_suspicious_subdomain_of_old_domain_gets_no_benefit(client, intel):
     assert r["verdict"] != "safe"
 
 
+def test_official_suffix_is_trusted(client, intel):
+    r = scan(client, "https://tybsng.tubitak.gov.tr/basvuru")
+    assert (r["verdict"], r["engine"]) == ("safe", "reputation")
+    assert "tubitak.gov.tr" in r["reasons"][0]
+    assert intel["age_calls"] == []
+
+
+def test_lookalike_of_official_suffix_is_not_trusted(client, intel):
+    assert scan(client, "http://tubitak-gov-tr.basvuru-giris.xyz/")["engine"] != "reputation"
+
+
 def test_own_site_is_trusted(client, intel):
     intel["age"] = 1
     for url in ("https://kanca.salihdinckan.com", "https://kanca-inky.vercel.app"):

@@ -222,6 +222,8 @@ REASONS = {
              "The connection is not encrypted (no HTTPS)."),
     "known": ("{domain} bilinen ve güvenilir bir alan adı.",
               "{domain} is a well-known, trusted domain."),
+    "official": ("{domain} yalnızca resmi kurumların alabildiği bir uzantıya sahip; dolandırıcılar bu tür alan adlarını kaydedemez.",
+                 "{domain} uses an extension only official institutions can register; scammers cannot obtain one."),
     "hosting": ("{domain} ücretsiz bir barındırma platformu; herkes bu platformda site açabilir. Sitenin sahibinden emin ol.",
                 "{domain} is a free hosting platform where anyone can publish a site. Make sure you trust the owner."),
     "model": ("Makine öğrenmesi modeli alan adının yapısını (uzunluk, alt alan adları, karakterler) olağan dışı buldu.",
