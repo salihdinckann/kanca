@@ -5,7 +5,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { HookScene, SceneState } from "@/components/HookScene";
 import { Logo, LogoMark } from "@/components/Logo";
 import { Engine, Lang, STRINGS, Verdict } from "@/lib/i18n";
-import { OWNER, REPO_URL } from "@/lib/site";
+import { EXTENSION_URL, OWNER, REPO_URL } from "@/lib/site";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -120,6 +120,16 @@ function GitHubIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true">
       <path d="M12 .5a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0C17.3 4.3 18.3 4.6 18.3 4.6c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6A11.5 11.5 0 0 0 12 .5Z" />
+    </svg>
+  );
+}
+
+function ChromeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 8h9.2M8.5 14 3.9 6.1M15.5 14l-4.6 7.9" />
     </svg>
   );
 }
@@ -457,6 +467,16 @@ export default function Home() {
             <a href="#model" className="hidden text-muted transition-colors hover:text-paper sm:block">
               {t.nav.model}
             </a>
+            {/* Browser extensions don't run on phones, so the button only shows from sm up. */}
+            <a
+              href={EXTENSION_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden items-center gap-2 border border-bobber/60 px-3 py-1.5 text-xs font-semibold text-paper transition-colors hover:border-bobber hover:bg-bobber/10 sm:inline-flex"
+            >
+              <ChromeIcon />
+              {t.nav.extension}
+            </a>
             {REPO_URL && (
               <a
                 href={REPO_URL}
@@ -601,6 +621,17 @@ export default function Home() {
                 </span>
               ))}
             </p>
+
+            <a
+              href={EXTENSION_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rise-in mt-4 hidden items-center gap-2 text-sm text-muted underline decoration-transparent underline-offset-4 transition-colors hover:text-paper hover:decoration-bobber sm:inline-flex"
+              style={{ animationDelay: "0.42s" }}
+            >
+              <ChromeIcon />
+              {t.extensionHint} <span className="text-bobber">{t.nav.extension} →</span>
+            </a>
 
             {error && (
               <p role="alert" className="card-in mt-8 border-l-2 border-bobber bg-bobber/5 px-4 py-3 text-sm text-paper">

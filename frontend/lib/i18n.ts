@@ -4,7 +4,8 @@ export type Engine = "reputation" | "ml" | "heuristic" | "safe_browsing";
 
 export const STRINGS = {
   tr: {
-    nav: { how: "Nasıl çalışır", model: "Model", source: "Kaynak kod" },
+    nav: { how: "Nasıl çalışır", model: "Model", source: "Kaynak kod", extension: "Chrome'a ekle" },
+    extensionHint: "Tarayıcı eklentisi: bir linke sağ tıkla, açmadan tara.",
     kicker: "Oltalama link analizi",
     titleLead: "",
     titleMark: "Kancayı",
@@ -91,7 +92,8 @@ export const STRINGS = {
     privacyPolicy: "Gizlilik politikası",
   },
   en: {
-    nav: { how: "How it works", model: "Model", source: "Source code" },
+    nav: { how: "How it works", model: "Model", source: "Source code", extension: "Add to Chrome" },
+    extensionHint: "Browser extension: right-click any link to scan it before opening.",
     kicker: "Phishing link analysis",
     titleLead: "See the ",
     titleMark: "hook",

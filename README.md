@@ -10,7 +10,7 @@
 
 > 🇹🇷 Yapay zeka destekli oltalama (phishing) link tarayıcı. Şüpheli linki yapıştır, risk skorunu ve nedenlerini Türkçe veya İngilizce gör.
 
-**Live demo:** [kanca.salihdinckan.com](https://kanca.salihdinckan.com)
+**Live demo:** [kanca.salihdinckan.com](https://kanca.salihdinckan.com) · **Chrome extension:** [Chrome Web Store](https://chromewebstore.google.com/detail/laldghnfbojaemahhoabgakiefhmdblm)
 
 ## Features
 
@@ -155,7 +155,9 @@ POST /api/scan/text
 - **Right-click a link → Scan link with Kanca:** checks a link before you open it.
 - **Privacy:** nothing is scanned automatically. A URL only leaves the browser when you click.
 
-**Install (developer mode):**
+**Install:** [Chrome Web Store](https://chromewebstore.google.com/detail/laldghnfbojaemahhoabgakiefhmdblm) (works in Chrome, Edge and Brave).
+
+**Install from source (developer mode):**
 1. Download this repository (Code → Download ZIP) and unzip it.
 2. Open `chrome://extensions` and turn on **Developer mode** (top right).
 3. Click **Load unpacked** and select the `extension` folder.
