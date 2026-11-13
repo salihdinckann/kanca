@@ -185,3 +185,121 @@ body::before {
   50% { transform: translateY(5px); }
 }
 .drift { animation: drift 3.4s ease-in-out infinite; }
+
+/* ---------- atmosphere ---------- */
+
+/* Soft light from above the water (teal) and from the bobber (orange). */
+.aurora {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1100px;
+  pointer-events: none;
+  background:
+    radial-gradient(700px 420px at 78% 8%, rgba(79, 209, 184, 0.11), transparent 70%),
+    radial-gradient(620px 380px at 12% 42%, rgba(255, 91, 46, 0.08), transparent 70%),
+    radial-gradient(900px 300px at 50% -10%, rgba(236, 230, 217, 0.05), transparent 70%);
+}
+
+/* Faint grid that fades out downward, like a sonar screen. */
+.grid-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(236, 230, 217, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(236, 230, 217, 0.035) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black, transparent 75%);
+}
+
+.glass {
+  background: linear-gradient(180deg, rgba(20, 31, 47, 0.72), rgba(14, 23, 36, 0.72));
+  border: 1px solid var(--color-line);
+  box-shadow: inset 0 1px 0 rgba(236, 230, 217, 0.06), 0 30px 80px -40px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.glow-bobber {
+  box-shadow: 0 10px 34px -10px rgba(255, 91, 46, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.input-shell {
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.input-shell:focus-within {
+  border-color: rgba(255, 91, 46, 0.55);
+  box-shadow: 0 0 0 4px rgba(255, 91, 46, 0.1), inset 0 1px 0 rgba(236, 230, 217, 0.06), 0 30px 80px -40px rgba(255, 91, 46, 0.45);
+}
+
+.text-gradient {
+  background: linear-gradient(100deg, var(--color-paper) 10%, #ffd9c9 55%, var(--color-bobber) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes ping-soft {
+  0% { transform: scale(1); opacity: 0.7; }
+  80%, 100% { transform: scale(2.4); opacity: 0; }
+}
+.ping-soft { animation: ping-soft 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
+
+.meter-fill {
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+}
+.reveal.is-in .meter-fill { transform: scaleX(1); }
+
+/* ---------- extras ---------- */
+
+@keyframes marquee {
+  to { transform: translateX(calc(-50% - 6px)); }
+}
+.marquee { animation: marquee 40s linear infinite; }
+
+.faq summary::-webkit-details-marker { display: none; }
+.faq[open] { border-color: rgba(79, 209, 184, 0.3); }
+
+.cursor-light {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s;
+  background: radial-gradient(420px circle at var(--x, 50%) var(--y, 50%), rgba(79, 209, 184, 0.07), transparent 60%);
+}
+
+@keyframes danger-flash {
+  0% { opacity: 0; }
+  12% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.danger-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(ellipse at center, rgba(255, 91, 46, 0) 30%, rgba(255, 91, 46, 0.35) 100%);
+  animation: danger-flash 1.1s ease-out forwards;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
+}
+.shake { animation: shake 0.5s ease-in-out 0.35s; }
+
+@keyframes swim-away {
+  0% { transform: translateX(0) scaleX(-1); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translateX(260px) scaleX(-1); opacity: 0; }
+}
+.swim-away { animation: swim-away 3.2s cubic-bezier(0.45, 0, 0.55, 1) 0.4s both; }

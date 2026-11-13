@@ -2,8 +2,13 @@
 
 import { FormEvent, useEffect, useState } from "react";
 
+import { BrandMarquee, CursorLight, DangerFlash, Faq, StatsBand } from "@/components/Extras";
 import { HookScene, SceneState } from "@/components/HookScene";
+import { LinkXray } from "@/components/LinkXray";
 import { Logo, LogoMark } from "@/components/Logo";
+import { Quiz } from "@/components/Quiz";
+import { SmsPhone } from "@/components/SmsPhone";
+import { QUIZ_TEXT, SMS_TEXT, STATS_TEXT } from "@/lib/extras";
 import { Engine, Lang, STRINGS, Verdict } from "@/lib/i18n";
 import { EXTENSION_URL, OWNER, REPO_URL } from "@/lib/site";
 
@@ -171,7 +176,7 @@ function ResultCard({ result, ms, lang }: { result: ScanResult; ms: number; lang
   const ticks = 25;
 
   return (
-    <section aria-live="polite" className="card-in mt-8 border border-line bg-deep/70">
+    <section aria-live="polite" className={`glass card-in mt-8 overflow-hidden rounded-2xl ${result.verdict === "dangerous" ? "shake" : ""}`}>
       <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <p className={`flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] ${tone.text}`}>
@@ -192,7 +197,7 @@ function ResultCard({ result, ms, lang }: { result: ScanResult; ms: number; lang
         {Array.from({ length: ticks }, (_, i) => (
           <span
             key={i}
-            className={`h-3 flex-1 transition-colors duration-300 ${(i + 1) / ticks <= score / 100 ? tone.fill : "bg-line"}`}
+            className={`h-3 flex-1 rounded-[2px] transition-colors duration-300 ${(i + 1) / ticks <= score / 100 ? tone.fill : "bg-line"}`}
           />
         ))}
       </div>
@@ -204,7 +209,7 @@ function ResultCard({ result, ms, lang }: { result: ScanResult; ms: number; lang
           [t.result.age, formatAge(result.domain_age_days, lang)],
           [t.result.duration, `${ms} ms`],
         ].map(([k, val]) => (
-          <div key={k} className="min-w-0 bg-[#0d1522] px-6 py-3">
+          <div key={k} className="min-w-0 bg-[#0f1927] px-6 py-3">
             <dt className="text-faint">{k}</dt>
             <dd className="mt-1 truncate text-paper" title={val}>
               {val}
@@ -246,7 +251,7 @@ function LinkList({
 }) {
   const t = STRINGS[lang];
   return (
-    <section className="card-in mt-8 border border-line bg-deep/70">
+    <section className="glass card-in mt-8 overflow-hidden rounded-2xl">
       <p className="border-b border-line px-6 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-faint">
         {t.linksFound.replace("{n}", String(links.length))}
       </p>
@@ -452,9 +457,13 @@ export default function Home() {
   ].filter(Boolean) as { href: string; label: string }[];
 
   return (
-    <div className="flex min-h-screen flex-col overflow-x-hidden">
-      <header className="relative z-10">
-        <div className="mx-auto flex h-[72px] max-w-6xl items-center justify-between px-5 sm:px-8">
+    <div className="relative flex min-h-screen flex-col overflow-x-hidden">
+      <div className="aurora" aria-hidden="true" />
+      <CursorLight />
+      {shown?.verdict === "dangerous" && <DangerFlash key={`flash-${scanId}-${selected}`} />}
+      <div className="grid-bg h-[900px]" aria-hidden="true" />
+      <header className="sticky top-0 z-40 border-b border-line bg-ink/60 backdrop-blur-xl">
+        <div className="mx-auto flex h-[68px] max-w-6xl items-center justify-between px-5 sm:px-8">
           {/* A plain <a> on purpose: clicking the logo should fully reload the page, which <Link> wouldn't. */}
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a href="/" aria-label="Kanca" className="transition-opacity hover:opacity-80">
@@ -464,6 +473,9 @@ export default function Home() {
             <a href="#how" className="hidden text-muted transition-colors hover:text-paper sm:block">
               {t.nav.how}
             </a>
+            <a href="#quiz" className="hidden text-muted transition-colors hover:text-paper md:block">
+              {t.nav.quiz}
+            </a>
             <a href="#model" className="hidden text-muted transition-colors hover:text-paper sm:block">
               {t.nav.model}
             </a>
@@ -472,7 +484,7 @@ export default function Home() {
               href={EXTENSION_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden items-center gap-2 border border-bobber/60 px-3 py-1.5 text-xs font-semibold text-paper transition-colors hover:border-bobber hover:bg-bobber/10 sm:inline-flex"
+              className="glow-bobber hidden items-center gap-2 rounded-full bg-bobber px-4 py-2 text-xs font-semibold text-ink transition-all hover:-translate-y-px hover:bg-[#ff7a52] sm:inline-flex"
             >
               <ChromeIcon />
               {t.nav.extension}
@@ -495,8 +507,28 @@ export default function Home() {
 
       <main className="flex-1">
         {/* ---------- hero ---------- */}
-        <section className="mx-auto grid max-w-6xl gap-4 px-5 pb-20 pt-10 sm:px-8 sm:pt-16 lg:grid-cols-[1.2fr_0.8fr] lg:gap-10">
+        <section className="relative mx-auto grid max-w-6xl gap-4 px-5 pb-24 pt-10 sm:px-8 sm:pt-16 lg:grid-cols-[1.2fr_0.8fr] lg:gap-10">
           <div className="min-w-0">
+            <a
+              href={EXTENSION_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={t.extensionHint}
+              className="rise-in group mb-7 hidden items-center sm:inline-flex gap-2.5 rounded-full border border-line bg-deep/70 py-1 pl-1.5 pr-3.5 text-xs text-muted backdrop-blur transition-colors hover:border-bobber/50 hover:text-paper"
+            >
+              <span className="relative flex h-5 items-center gap-1.5 rounded-full bg-sea/15 px-2 font-mono text-[10px] uppercase tracking-[0.15em] text-sea">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="ping-soft absolute inset-0 rounded-full bg-sea" />
+                  <span className="relative h-1.5 w-1.5 rounded-full bg-sea" />
+                </span>
+                {lang === "tr" ? "Yeni" : "New"}
+              </span>
+              <span>
+                {t.badge}
+                <span className="hidden text-faint md:inline"> · {t.extensionHint}</span>
+              </span>
+              <span className="text-faint transition-transform group-hover:translate-x-0.5">→</span>
+            </a>
             <div className="rise-in">
               <Kicker>{t.kicker}</Kicker>
             </div>
@@ -505,7 +537,7 @@ export default function Home() {
               style={{ animationDelay: "0.08s" }}
             >
               {t.titleLead}
-              <span className="relative inline-block">
+              <span className="text-gradient relative inline-block">
                 {t.titleMark}
                 <HookUnderline key={lang} />
               </span>
@@ -516,7 +548,7 @@ export default function Home() {
             </p>
 
             <form onSubmit={onSubmit} className="rise-in mt-9" style={{ animationDelay: "0.24s" }}>
-              <div role="tablist" className="flex gap-6 font-mono text-xs uppercase tracking-[0.15em]">
+              <div role="tablist" className="mb-3 inline-flex gap-1 rounded-full border border-line bg-deep/60 p-1 font-mono text-[11px] uppercase tracking-[0.15em]">
                 {(["url", "text"] as const).map((m) => (
                   <button
                     key={m}
@@ -524,8 +556,8 @@ export default function Home() {
                     role="tab"
                     aria-selected={mode === m}
                     onClick={() => changeMode(m)}
-                    className={`-mb-px border-b-2 pb-2 transition-colors ${
-                      mode === m ? "border-bobber text-paper" : "border-transparent text-faint hover:text-muted"
+                    className={`rounded-full px-4 py-1.5 transition-colors ${
+                      mode === m ? "bg-paper/10 text-paper shadow-[inset_0_1px_0_rgba(236,230,217,0.08)]" : "text-faint hover:text-muted"
                     }`}
                   >
                     {t.modes[m]}
@@ -533,7 +565,7 @@ export default function Home() {
                 ))}
               </div>
               <div
-                className={`flex flex-col border border-line bg-deep/80 transition-colors focus-within:border-paper/30 ${
+                className={`glass input-shell flex flex-col gap-1.5 rounded-2xl p-1.5 ${
                   mode === "url" ? "sm:flex-row" : ""
                 }`}
               >
@@ -565,7 +597,7 @@ export default function Home() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="group flex items-center justify-center gap-2 bg-bobber px-6 py-4 text-sm font-semibold text-ink transition-colors hover:bg-[#ff7a52] disabled:cursor-wait"
+                  className="glow-bobber group flex items-center justify-center gap-2 rounded-xl bg-bobber px-6 py-3.5 text-sm font-semibold text-ink transition-all hover:-translate-y-px hover:bg-[#ff7a52] disabled:cursor-wait disabled:opacity-80"
                 >
                   {loading ? t.scanning : mode === "url" ? t.scan : t.scanText}
                   <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -573,7 +605,8 @@ export default function Home() {
                   </svg>
                 </button>
               </div>
-              <div className={`relative h-px overflow-hidden ${loading ? "sweep" : ""}`} />
+              <div className={`relative mx-4 h-px overflow-hidden ${loading ? "sweep" : ""}`} />
+              {mode === "url" && !shown && !loading && url.trim().length > 3 && <LinkXray value={url} lang={lang} />}
             </form>
 
             <div className="rise-in mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-xs" style={{ animationDelay: "0.3s" }}>
@@ -587,7 +620,7 @@ export default function Home() {
                       setUrl(ex);
                       scan(ex);
                     }}
-                    className="max-w-full truncate text-muted underline decoration-faint underline-offset-4 transition-colors hover:text-paper hover:decoration-bobber"
+                    className="max-w-full truncate rounded-full border border-line bg-deep/50 px-3 py-1 text-muted transition-colors hover:border-bobber/50 hover:text-paper"
                   >
                     {hostOf(ex)}
                   </button>
@@ -599,7 +632,7 @@ export default function Home() {
                     setText(t.textExample);
                     scanMessage(t.textExample);
                   }}
-                  className="text-muted underline decoration-faint underline-offset-4 transition-colors hover:text-paper hover:decoration-bobber"
+                  className="rounded-full border border-line bg-deep/50 px-3 py-1 text-muted transition-colors hover:border-bobber/50 hover:text-paper"
                 >
                   {t.textExampleLabel}
                 </button>
@@ -613,28 +646,19 @@ export default function Home() {
               </p>
             )}
 
-            <p className="rise-in mt-8 flex flex-wrap gap-x-3 gap-y-1 font-mono text-[11px] text-faint" style={{ animationDelay: "0.36s" }}>
-              {[...t.proof, t.privacy].map((p, i) => (
-                <span key={p} className="flex items-center gap-3">
-                  {i > 0 && <span className="text-faint/60">·</span>}
+            <ul className="rise-in mt-9 flex flex-wrap gap-2 font-mono text-[11px] text-muted" style={{ animationDelay: "0.36s" }}>
+              {[...t.proof, t.privacy].map((p) => (
+                <li key={p} className="flex items-center gap-2 rounded-lg border border-line bg-deep/40 px-2.5 py-1.5">
+                  <svg viewBox="0 0 16 16" className="h-3 w-3 shrink-0 text-sea" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+                    <path d="M3 8.5 6.5 12 13 4.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                   {p}
-                </span>
+                </li>
               ))}
-            </p>
-
-            <a
-              href={EXTENSION_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rise-in mt-4 hidden items-center gap-2 text-sm text-muted underline decoration-transparent underline-offset-4 transition-colors hover:text-paper hover:decoration-bobber sm:inline-flex"
-              style={{ animationDelay: "0.42s" }}
-            >
-              <ChromeIcon />
-              {t.extensionHint} <span className="text-bobber">{t.nav.extension} →</span>
-            </a>
+            </ul>
 
             {error && (
-              <p role="alert" className="card-in mt-8 border-l-2 border-bobber bg-bobber/5 px-4 py-3 text-sm text-paper">
+              <p role="alert" className="card-in mt-8 rounded-xl border border-bobber/40 bg-bobber/[0.07] px-4 py-3 text-sm text-paper">
                 {t[error]}
               </p>
             )}
@@ -652,54 +676,107 @@ export default function Home() {
         </section>
 
         {/* ---------- how it works ---------- */}
-        <section id="how" className="scroll-mt-4 border-t border-line">
+        <section id="how" className="relative scroll-mt-16 border-t border-line">
           <div className="mx-auto grid max-w-6xl gap-12 px-5 py-24 sm:px-8 lg:grid-cols-[0.8fr_1.2fr]">
-            <div className="reveal lg:sticky lg:top-12 lg:self-start">
+            <div className="reveal lg:sticky lg:top-28 lg:self-start">
               <Kicker>{t.howKicker}</Kicker>
               <h2 className="mt-5 max-w-sm font-display text-3xl font-semibold leading-tight text-paper sm:text-4xl">{t.howTitle}</h2>
             </div>
             <ol className="relative">
-              <span className="reveal-line absolute bottom-2 left-[5px] top-2 w-px bg-gradient-to-b from-sea/60 via-sea/25 to-transparent" aria-hidden="true" />
+              <span className="reveal-line absolute bottom-8 left-[5px] top-8 w-px bg-gradient-to-b from-sea/60 via-sea/25 to-transparent" aria-hidden="true" />
               {t.how.map(([depth, title, desc], i) => (
-                <li key={i} className="reveal relative pb-14 pl-12 last:pb-0" style={{ transitionDelay: `${i * 0.12}s` }}>
+                <li key={i} className="reveal relative pb-5 pl-10 last:pb-0" style={{ transitionDelay: `${i * 0.12}s` }}>
                   <span
-                    className={`absolute left-0 top-1.5 h-[11px] w-[11px] rounded-full border-2 ${
-                      i === 0 ? "border-bobber bg-bobber" : "border-sea/70 bg-ink"
+                    className={`absolute left-0 top-7 h-[11px] w-[11px] rounded-full border-2 ${
+                      i === 0 ? "border-bobber bg-bobber shadow-[0_0_12px_rgba(255,91,46,0.7)]" : "border-sea/70 bg-ink"
                     }`}
                     aria-hidden="true"
                   />
-                  <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-faint">
-                    {String(i * 12).padStart(2, "0")} m · {depth}
-                  </p>
-                  <h3 className="mt-2 font-display text-xl font-semibold text-paper">{title}</h3>
-                  <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-muted">{desc}</p>
+                  <div className="glass rounded-2xl p-6 transition-colors duration-300 hover:border-sea/30">
+                    <div className="flex items-center justify-between gap-4">
+                      <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-faint">
+                        {String(i * 12).padStart(2, "0")} m · {depth}
+                      </p>
+                      <span className="font-display text-sm font-semibold text-faint/70">{String(i + 1).padStart(2, "0")}</span>
+                    </div>
+                    <h3 className="mt-2 font-display text-xl font-semibold text-paper">{title}</h3>
+                    <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-muted">{desc}</p>
+                  </div>
                 </li>
               ))}
             </ol>
           </div>
         </section>
 
+        {/* ---------- SMS phone ---------- */}
+        <section id="sms" className="relative scroll-mt-16 overflow-hidden border-t border-line">
+          <div className="mx-auto grid max-w-6xl items-center gap-14 px-5 py-24 sm:px-8 lg:grid-cols-[1fr_auto]">
+            <div className="reveal">
+              <Kicker>{SMS_TEXT[lang].kicker}</Kicker>
+              <h2 className="mt-5 max-w-md font-display text-3xl font-semibold leading-tight text-paper sm:text-5xl">{SMS_TEXT[lang].title}</h2>
+              <p className="mt-5 max-w-md text-[15px] leading-relaxed text-muted">{SMS_TEXT[lang].subtitle}</p>
+            </div>
+            <div className="reveal" style={{ transitionDelay: "0.12s" }}>
+              <SmsPhone lang={lang} apiUrl={API_URL} />
+            </div>
+          </div>
+        </section>
+
+        {/* ---------- quiz ---------- */}
+        <section id="quiz" className="relative scroll-mt-16 border-t border-line bg-gradient-to-b from-deep/50 to-transparent">
+          <div className="mx-auto grid max-w-6xl gap-12 px-5 py-24 sm:px-8 lg:grid-cols-[0.8fr_1.2fr]">
+            <div className="reveal">
+              <Kicker>{QUIZ_TEXT[lang].kicker}</Kicker>
+              <h2 className="mt-5 max-w-sm font-display text-3xl font-semibold leading-tight text-paper sm:text-5xl">{QUIZ_TEXT[lang].title}</h2>
+              <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-muted">{QUIZ_TEXT[lang].subtitle}</p>
+            </div>
+            <div className="reveal" style={{ transitionDelay: "0.12s" }}>
+              <Quiz key={lang} lang={lang} />
+            </div>
+          </div>
+        </section>
+
+        {/* ---------- field data ---------- */}
+        <section id="data" className="relative scroll-mt-16 border-t border-line">
+          <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8">
+            <div className="reveal mb-10">
+              <Kicker>{STATS_TEXT[lang].kicker}</Kicker>
+              <h2 className="mt-5 max-w-2xl font-display text-3xl font-semibold leading-tight text-paper sm:text-4xl">{STATS_TEXT[lang].title}</h2>
+            </div>
+            <StatsBand lang={lang} />
+            <BrandMarquee lang={lang} />
+          </div>
+        </section>
+
         {/* ---------- model ---------- */}
-        <section id="model" className="scroll-mt-4 border-t border-line bg-deep/40">
+        <section id="model" className="scroll-mt-16 border-t border-line bg-gradient-to-b from-deep/60 to-ink">
           <div className="mx-auto grid max-w-6xl gap-14 px-5 py-24 sm:px-8 lg:grid-cols-2">
             <div className="reveal">
               <Kicker>{t.modelKicker}</Kicker>
               <h2 className="mt-5 max-w-md font-display text-3xl font-semibold leading-tight text-paper sm:text-4xl">{t.modelTitle}</h2>
               <p className="mt-5 max-w-md text-[15px] leading-relaxed text-muted">{t.modelSubtitle}</p>
-              <dl className="mt-10 border-t border-line">
-                {t.metrics.map(([k, v]) => (
-                  <div key={k} className="flex items-baseline justify-between border-b border-line py-4">
-                    <dt className="text-sm text-muted">{k}</dt>
-                    <dd className="font-display text-xl font-medium tabular-nums text-paper">{v}</dd>
-                  </div>
-                ))}
+              <dl className="mt-10 grid grid-cols-2 gap-3">
+                {t.metrics.map(([k, v]) => {
+                  const n = parseFloat(v.replace("%", "").replace(",", "."));
+                  const pct = n <= 1 ? n * 100 : n;
+                  return (
+                    <div key={k} className="glass rounded-2xl p-5">
+                      <dt className="text-xs text-muted">{k}</dt>
+                      <dd className="mt-2 font-display text-3xl font-semibold tabular-nums text-paper">{v}</dd>
+                      <div className="mt-4 h-1 overflow-hidden rounded-full bg-line" aria-hidden="true">
+                        <div className="meter-fill h-full rounded-full bg-gradient-to-r from-sea/60 to-sea" style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
               </dl>
             </div>
 
-            <div className="reveal self-end" style={{ transitionDelay: "0.15s" }}>
+            <div className="reveal space-y-4 self-end" style={{ transitionDelay: "0.15s" }}>
+              <div className="glass rounded-2xl p-7">
               <div className="flex flex-wrap items-end gap-x-6 gap-y-4">
                 <div>
-                  <p className="font-display text-4xl font-semibold text-faint line-through decoration-bobber decoration-[3px] sm:text-5xl xl:text-6xl">
+                  <p className="font-display text-4xl font-semibold text-faint line-through decoration-bobber decoration-[3px] sm:text-5xl">
                     {lang === "tr" ? "%99,6" : "99.6%"}
                   </p>
                   <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.15em] text-faint">{t.v1}</p>
@@ -708,14 +785,15 @@ export default function Home() {
                   <path d="M0 8h36M30 2l6 6-6 6" />
                 </svg>
                 <div>
-                  <p className="font-display text-4xl font-semibold text-paper sm:text-5xl xl:text-6xl">{lang === "tr" ? "%85,4" : "85.4%"}</p>
+                  <p className="font-display text-4xl font-semibold text-paper sm:text-5xl">{lang === "tr" ? "%85,4" : "85.4%"}</p>
                   <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.15em] text-sea">{t.v2}</p>
                 </div>
               </div>
               <h3 className="mt-10 font-display text-lg font-semibold text-paper">{t.leakTitle}</h3>
               <p className="mt-3 max-w-lg text-[15px] leading-relaxed text-muted">{t.leakBody}</p>
+              </div>
 
-              <div className="mt-12 border-t border-line pt-10">
+              <div className="glass rounded-2xl p-7">
                 <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
                   <p className="font-display text-3xl font-semibold text-faint line-through decoration-bobber decoration-[3px]">
                     {lang === "tr" ? "%86,7" : "86.7%"}
@@ -729,6 +807,11 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </section>
+
+        {/* ---------- FAQ ---------- */}
+        <section id="faq" className="scroll-mt-16 border-t border-line">
+          <Faq lang={lang} />
         </section>
       </main>
 

@@ -77,6 +77,19 @@ export function HookScene({ state, host, label }: { state: SceneState; host: str
         />
       ))}
 
+      {/* safe: a fish sniffs the bait and swims away */}
+      {state === "safe" && (
+        <svg key={host} className="swim-away absolute left-[30%] top-[330px] h-8 w-14 text-sea" viewBox="0 0 56 32" fill="currentColor">
+          <path d="M6 16c8-11 26-13 36-2l9-8-2 10 2 10-9-8C32 29 14 27 6 16Z" opacity="0.85" />
+          <circle cx="15" cy="14" r="1.8" fill="#0a1019" />
+        </svg>
+      )}
+
+      {/* dangerous: the water flushes orange for a moment */}
+      {state === "dangerous" && (
+        <div key={host} className="danger-flash absolute inset-x-0 bottom-0 top-[128px]" style={{ position: "absolute", background: "linear-gradient(to bottom, rgba(255,91,46,0.18), transparent)" }} />
+      )}
+
       {/* rig */}
       <div className="lower absolute top-0" style={{ left: "calc(50% - 100px)", width: 200 }}>
         <div className="swing">
