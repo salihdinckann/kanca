@@ -75,12 +75,19 @@ export function BrandMarquee({ lang }: { lang: Lang }) {
         }}
       >
         <ul className="marquee flex w-max gap-3 group-hover:[animation-play-state:paused]">
-          {row.map(([name, n], i) => (
+          {row.map(([name, n, bg, fg, initial], i) => (
             <li
               key={i}
               aria-hidden={i >= BRANDS.length}
-              className="flex items-center gap-3 rounded-full border border-line bg-deep/60 py-2 pl-4 pr-2 text-sm text-paper"
+              className="flex items-center gap-2.5 rounded-full border border-line bg-deep/60 py-1.5 pl-1.5 pr-2 text-sm text-paper"
             >
+              <span
+                className="grid h-7 w-7 shrink-0 place-items-center rounded-full font-display text-xs font-bold shadow-[inset_0_-2px_0_rgba(0,0,0,0.15)]"
+                style={{ background: bg, color: fg }}
+                aria-hidden="true"
+              >
+                {initial}
+              </span>
               {name}
               <span className="rounded-full bg-bobber/15 px-2.5 py-0.5 font-mono text-xs text-bobber">
                 {n} <span className="text-bobber/70">{t.brandsUnit}</span>

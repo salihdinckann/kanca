@@ -245,19 +245,20 @@ export const STATS_TEXT = {
   },
 };
 
-export const BRANDS: [string, number][] = [
-  ["sahibinden", 42],
-  ["Garanti BBVA", 21],
-  ["Yatırım / borsa", 17],
-  ["PTT", 15],
-  ["Trendyol", 10],
-  ["e-Devlet", 9],
-  ["Kooperatif market", 9],
-  ["MHRS", 9],
-  ["A101", 5],
-  ["Akbank", 4],
-  ["HGS", 3],
-  ["TOKİ", 3],
+/** [name, fake-domain count, badge colour, badge text colour, initial]. Colours echo each brand; no logos are used. */
+export const BRANDS: [string, number, string, string, string][] = [
+  ["sahibinden", 42, "#ffe800", "#1a1a1a", "S"],
+  ["Garanti BBVA", 21, "#00854a", "#ffffff", "G"],
+  ["Yatırım / borsa", 17, "#f2b84b", "#1a1a1a", "₺"],
+  ["PTT", 15, "#ffcc00", "#1a1a1a", "P"],
+  ["Trendyol", 10, "#f27a1a", "#ffffff", "T"],
+  ["e-Devlet", 9, "#e30a17", "#ffffff", "e"],
+  ["Kooperatif market", 9, "#2e8b3a", "#ffffff", "K"],
+  ["MHRS", 9, "#0071bc", "#ffffff", "M"],
+  ["A101", 5, "#00a0e3", "#ffffff", "A"],
+  ["Akbank", 4, "#dc0005", "#ffffff", "A"],
+  ["HGS", 3, "#005ca9", "#ffffff", "H"],
+  ["TOKİ", 3, "#1b3c73", "#ffffff", "T"],
 ];
 
 /* ---------- FAQ ---------- */
