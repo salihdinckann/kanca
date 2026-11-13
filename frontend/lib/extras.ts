@@ -273,7 +273,7 @@ export const FAQ: Record<Lang, { kicker: string; title: string; items: [string, 
       ],
       [
         "Kanca linki açıyor mu?",
-        "Hayır, sayfa hiç açılmaz. Yalnızca adresin metni incelenir; ek olarak alan adının kayıt tarihi (RDAP) ve Google Safe Browsing listesi sorgulanır.",
+        "Hayır, sayfa hiç açılmaz. Yalnızca adresin metni incelenir; ek olarak alan adının kayıt tarihi (RDAP) ve Google Safe Browsing sorgulanır. USOM ve OpenPhish listeleri sunucuda tutulur; linkin bu kurumlara gönderilmesi gerekmez.",
       ],
       [
         "Ne kadar doğru?",
@@ -299,7 +299,7 @@ export const FAQ: Record<Lang, { kicker: string; title: string; items: [string, 
       ],
       [
         "Does Kanca open the link?",
-        "No, the page is never opened. Only the address text is analysed, plus a lookup of the domain's registration date (RDAP) and Google Safe Browsing.",
+        "No, the page is never opened. Only the address text is analysed, plus a lookup of the domain's registration date (RDAP) and Google Safe Browsing. The USOM and OpenPhish lists are kept on the server, so the link is never sent to them.",
       ],
       [
         "How accurate is it?",

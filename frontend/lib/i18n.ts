@@ -1,6 +1,6 @@
 export type Lang = "tr" | "en";
 export type Verdict = "safe" | "suspicious" | "dangerous";
-export type Engine = "reputation" | "ml" | "heuristic" | "safe_browsing";
+export type Engine = "reputation" | "ml" | "heuristic" | "safe_browsing" | "threat_feed";
 
 export const STRINGS = {
   tr: {
@@ -57,13 +57,14 @@ export const STRINGS = {
       ml: "Makine öğrenmesi",
       heuristic: "Kural tabanlı",
       safe_browsing: "Google Safe Browsing",
+      threat_feed: "Tehdit listesi",
     },
     units: { day: "gün", month: "ay", year: "yıl" },
     howKicker: "Nasıl çalışır",
     howTitle: "Her link dört katmandan geçer.",
     how: [
-      ["Yüzey", "İtibar ve tehdit listeleri", "Link önce Google Safe Browsing'in bilinen tehlikeli siteler listesinde aranır. Ardından elle seçilmiş güvenilir alan adları ve dünyanın en çok ziyaret edilen 10.000 sitesi (Tranco listesi) kontrol edilir. Herkesin sayfa açabildiği barındırma platformları ve link kısaltıcılar bilerek güvenilir sayılmaz."],
-      ["Orta su", "Makine öğrenmesi", "Bilinmeyen alan adlarını gradient boosting modeli değerlendirir: uzunluk, alt alan adları, rakamlar, entropi, uzantı ve marka taklidi ve alt alan adının yapısı gibi 19 özellik."],
+      ["Yüzey", "İtibar ve tehdit listeleri", "Link önce Google Safe Browsing'de, USOM'un 110 bini aşkın kayıtlı ulusal oltalama listesinde ve OpenPhish'in canlı listesinde aranır. Ardından elle seçilmiş güvenilir alan adları ve dünyanın en çok ziyaret edilen 10.000 sitesi (Tranco listesi) kontrol edilir. Herkesin sayfa açabildiği barındırma platformları ve link kısaltıcılar bilerek güvenilir sayılmaz."],
+      ["Orta su", "Makine öğrenmesi", "Bilinmeyen alan adlarını gradient boosting modeli değerlendirir: uzunluk, alt alan adları, rakamlar, entropi, uzantı ve alt alan adının yapısı gibi 19 özellik. Ayrıca 40'a yakın Türk ve küresel markanın harf oynanmış, benzer harfli ya da yem kelimeli taklitleri aranır."],
       ["Derin su", "Alan adının yaşı", "Alan adının ne zaman alındığı RDAP kayıtlarından sorgulanır. Oltalama siteleri genelde birkaç günlük alan adları kullanır; birkaç yıllık köklü alan adları daha düşük risk taşır."],
       ["Dip", "Açıklanabilir sonuç", "Yoldaki ve protokoldeki işaretler (@ hilesi, yönlendirme, HTTPS eksikliği) kurallarla puanlanır. Her skor, onu tetikleyen nedenlerle gelir; somut bir neden yoksa sonuç asla \"tehlikeli\" olmaz. Mesaj sekmesine SMS'in tamamını yapıştırırsan içindeki linkler otomatik bulunup tek tek taranır."],
     ],
@@ -146,13 +147,14 @@ export const STRINGS = {
       ml: "Machine learning",
       heuristic: "Rule-based",
       safe_browsing: "Google Safe Browsing",
+      threat_feed: "Threat feed",
     },
     units: { day: "days", month: "months", year: "years" },
     howKicker: "How it works",
     howTitle: "Every link goes through four layers.",
     how: [
-      ["Surface", "Reputation and threat lists", "The link is first looked up in Google Safe Browsing's list of known dangerous sites, then checked against hand-picked trusted domains and the world's 10,000 most visited sites (Tranco list). Open hosting platforms and URL shorteners are deliberately never trusted."],
-      ["Mid-water", "Machine learning", "Unknown domains are scored by a gradient boosting model on 16 features: length, subdomains, digits, entropy, TLD, brand impersonation and subdomain structure."],
+      ["Surface", "Reputation and threat lists", "The link is first looked up in Google Safe Browsing, USOM's national phishing list of over 110,000 entries and OpenPhish's live feed, then checked against hand-picked trusted domains and the world's 10,000 most visited sites (Tranco list). Open hosting platforms and URL shorteners are deliberately never trusted."],
+      ["Mid-water", "Machine learning", "Unknown domains are scored by a gradient boosting model on 16 features: length, subdomains, digits, entropy, TLD, brand impersonation and subdomain structure. Misspellings, look-alike letters and bait-word variants of about 40 Turkish and global brands are flagged."],
       ["Deep water", "Domain age", "The domain's registration date is looked up in RDAP records. Phishing sites usually use domains only a few days old; domains registered for years carry less risk."],
       ["Bottom", "Explainable output", "Path and protocol signals (@ tricks, redirects, missing HTTPS) are scored by rules. Every score comes with its reasons, and without a concrete reason the result is never \"dangerous\". Paste a whole SMS in the Message tab and its links are found and checked one by one."],
     ],

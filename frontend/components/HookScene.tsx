@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+
 import type { Verdict } from "@/lib/i18n";
 
 export type SceneState = "idle" | "checking" | Verdict;
@@ -26,15 +30,83 @@ const BUBBLES = [
   { left: "50%", size: 4, t: "8s", d: "4.4s" },
 ];
 
+type Bubble = { id: number; x: number; y: number };
+
+/**
+ * Pointer play: the rig leans toward the cursor, the cursor leaves bubbles in
+ * the water, and bringing it near the hook makes the bobber bite. Mouse only.
+ */
+function usePointerPlay(scene: React.RefObject<HTMLDivElement | null>, hook: React.RefObject<HTMLDivElement | null>) {
+  const rig = useRef<HTMLDivElement>(null);
+  const [near, setNear] = useState(false);
+  const [bubbles, setBubbles] = useState<Bubble[]>([]);
+
+  useEffect(() => {
+    if (!window.matchMedia("(pointer: fine)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let target = 0;
+    let angle = 0;
+    let frame = 0;
+    let lastBubble = 0;
+    let id = 0;
+
+    const tick = () => {
+      angle += (target - angle) * 0.06; // spring toward the cursor
+      if (rig.current) rig.current.style.transform = `rotate(${angle.toFixed(2)}deg)`;
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+
+    const move = (e: PointerEvent) => {
+      const box = scene.current?.getBoundingClientRect();
+      if (!box) return;
+      const dx = (e.clientX - (box.left + box.width / 2)) / (box.width / 2);
+      target = Math.max(-1, Math.min(1, dx)) * -9; // the hook swings toward the cursor
+
+      const h = hook.current?.getBoundingClientRect();
+      if (h) setNear(Math.hypot(e.clientX - (h.left + h.width / 2), e.clientY - (h.top + h.height / 2)) < 90);
+
+      // Bubbles where the cursor moves through the water.
+      const x = e.clientX - box.left;
+      const y = e.clientY - box.top;
+      const inWater = x > 0 && x < box.width && y > 140 && y < box.height;
+      if (inWater && e.timeStamp - lastBubble > 140) {
+        lastBubble = e.timeStamp;
+        const b = { id: id++, x, y };
+        setBubbles((list) => [...list.slice(-10), b]);
+        setTimeout(() => setBubbles((list) => list.filter((i) => i.id !== b.id)), 1600);
+      }
+    };
+    const leave = () => {
+      target = 0;
+      setNear(false);
+    };
+    window.addEventListener("pointermove", move);
+    document.addEventListener("pointerleave", leave);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("pointermove", move);
+      document.removeEventListener("pointerleave", leave);
+    };
+  }, [scene, hook]);
+
+  return { rig, near, bubbles };
+}
+
 /**
  * A fishing rig hanging into the water: bobber on the surface, hook below,
- * with the scanned link tied on as bait. Reacts to the scan state.
+ * with the scanned link tied on as bait. Reacts to the scan state and the pointer.
  */
-export function HookScene({ state, host, label }: { state: SceneState; host: string; label: string }) {
-  const motion = state === "checking" ? "nibble" : state === "dangerous" ? "tug" : "drift";
+export function HookScene({ state, host, label, tease }: { state: SceneState; host: string; label: string; tease: string }) {
+  const scene = useRef<HTMLDivElement>(null);
+  const hook = useRef<HTMLDivElement>(null);
+  const { rig, near, bubbles } = usePointerPlay(scene, hook);
+  const biting = near && (state === "idle" || state === "safe");
+  const motion = state === "checking" || biting ? "nibble" : state === "dangerous" ? "tug" : "drift";
 
   return (
     <div
+      ref={scene}
       className="relative h-[460px] w-full select-none overflow-hidden"
       style={{
         maskImage: "linear-gradient(to right, transparent, black 22%, black 78%, transparent)",
@@ -77,6 +149,23 @@ export function HookScene({ state, host, label }: { state: SceneState; host: str
         />
       ))}
 
+      {/* bubbles left by the cursor */}
+      {bubbles.map((b) => (
+        <span
+          key={b.id}
+          className="cursor-bubble absolute h-2 w-2 rounded-full border border-paper/40"
+          style={{ left: b.x - 4, top: b.y - 4 }}
+        />
+      ))}
+
+      {/* ripple rings when something bites */}
+      {biting && (
+        <svg className="absolute left-1/2 top-[120px] h-6 w-40 -translate-x-1/2" viewBox="0 0 160 24">
+          <ellipse className="ripple" cx="80" cy="12" rx="30" ry="4" fill="none" stroke="rgba(242,184,75,0.6)" />
+          <ellipse className="ripple" style={{ animationDelay: "0.6s" }} cx="80" cy="12" rx="30" ry="4" fill="none" stroke="rgba(242,184,75,0.4)" />
+        </svg>
+      )}
+
       {/* safe: a fish sniffs the bait and swims away */}
       {state === "safe" && (
         <svg key={host} className="swim-away absolute left-[30%] top-[330px] h-8 w-14 text-sea" viewBox="0 0 56 32" fill="currentColor">
@@ -92,6 +181,7 @@ export function HookScene({ state, host, label }: { state: SceneState; host: str
 
       {/* rig */}
       <div className="lower absolute top-0" style={{ left: "calc(50% - 100px)", width: 200 }}>
+        <div ref={rig} style={{ transformOrigin: "50% -300px", willChange: "transform" }}>
         <div className="swing">
           <div key={state} className={motion}>
             <svg viewBox="0 0 200 400" width="200" height="400" overflow="visible">
@@ -126,6 +216,14 @@ export function HookScene({ state, host, label }: { state: SceneState; host: str
               <path d="M74 378 V 392" stroke="rgba(236,230,217,0.4)" strokeWidth="1" />
             </svg>
 
+            {/* invisible target for the "near the hook" check */}
+            <div ref={hook} className="absolute h-16 w-16" style={{ top: 316, left: 42 }} />
+            {biting && (
+              <div className="chip-in absolute whitespace-nowrap rounded-full bg-sand px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-ink" style={{ top: 300, left: 112 }}>
+                {tease}
+              </div>
+            )}
+
             {/* bait: the link */}
             <div className="absolute" style={{ top: 390, left: 74, transform: "translateX(-50%)" }}>
               <div
@@ -140,6 +238,7 @@ export function HookScene({ state, host, label }: { state: SceneState; host: str
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>

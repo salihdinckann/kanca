@@ -128,32 +128,6 @@ export function Faq({ lang }: { lang: Lang }) {
   );
 }
 
-/** A soft light that follows the pointer, like a torch under water. Pointer devices only. */
-export function CursorLight() {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!window.matchMedia("(pointer: fine)").matches) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const el = ref.current;
-    if (!el) return;
-    let frame = 0;
-    const move = (e: PointerEvent) => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        el.style.setProperty("--x", `${e.clientX}px`);
-        el.style.setProperty("--y", `${e.clientY}px`);
-        el.style.opacity = "1";
-      });
-    };
-    window.addEventListener("pointermove", move);
-    return () => {
-      window.removeEventListener("pointermove", move);
-      cancelAnimationFrame(frame);
-    };
-  }, []);
-  return <div ref={ref} className="cursor-light" aria-hidden="true" />;
-}
-
 /** One orange flash across the screen when a scan comes back dangerous. */
 export function DangerFlash() {
   return <div className="danger-flash" aria-hidden="true" />;

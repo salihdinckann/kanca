@@ -20,7 +20,7 @@ const STRINGS = {
       suspicious: { label: "Şüpheli", title: "Bir şeyler tuhaf.", desc: "Bazı risk sinyalleri var. Kaynağından emin değilsen açma." },
       dangerous: { label: "Tehlikeli", title: "Bu bir kanca.", desc: "Büyük olasılıkla oltalama. Açma; kart, şifre veya kişisel bilgi girme." },
     },
-    engine: { reputation: "Alan adı itibarı", ml: "Makine öğrenmesi", heuristic: "Kural tabanlı", safe_browsing: "Google Safe Browsing" },
+    engine: { reputation: "Alan adı itibarı", ml: "Makine öğrenmesi", heuristic: "Kural tabanlı", safe_browsing: "Google Safe Browsing", threat_feed: "Tehdit listesi" },
   },
   en: {
     placeholder: "Paste a link",
@@ -39,7 +39,7 @@ const STRINGS = {
       suspicious: { label: "Suspicious", title: "Something's off.", desc: "Some risk signals were found. Don't open it unless you trust the source." },
       dangerous: { label: "Dangerous", title: "This is a hook.", desc: "Very likely phishing. Don't open it, and never enter card, password or personal details." },
     },
-    engine: { reputation: "Domain reputation", ml: "Machine learning", heuristic: "Rule-based", safe_browsing: "Google Safe Browsing" },
+    engine: { reputation: "Domain reputation", ml: "Machine learning", heuristic: "Rule-based", safe_browsing: "Google Safe Browsing", threat_feed: "Threat feed" },
   },
 };
 

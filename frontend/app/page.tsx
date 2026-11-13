@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 
-import { BrandMarquee, CursorLight, DangerFlash, Faq, StatsBand } from "@/components/Extras";
+import { BrandMarquee, DangerFlash, Faq, StatsBand } from "@/components/Extras";
 import { HookScene, SceneState } from "@/components/HookScene";
 import { LinkXray } from "@/components/LinkXray";
 import { Logo, LogoMark } from "@/components/Logo";
@@ -459,7 +459,6 @@ export default function Home() {
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden">
       <div className="aurora" aria-hidden="true" />
-      <CursorLight />
       {shown?.verdict === "dangerous" && <DangerFlash key={`flash-${scanId}-${selected}`} />}
       <div className="grid-bg h-[900px]" aria-hidden="true" />
       <header className="sticky top-0 z-40 border-b border-line bg-ink/60 backdrop-blur-xl">
@@ -671,7 +670,7 @@ export default function Home() {
           </div>
 
           <div className="hidden lg:block">
-            <HookScene state={sceneState} host={sceneHost} label={t.scene[sceneState]} />
+            <HookScene state={sceneState} host={sceneHost} label={t.scene[sceneState]} tease={lang === "tr" ? "Yemi ısırma!" : "Don't bite!"} />
           </div>
         </section>
 
