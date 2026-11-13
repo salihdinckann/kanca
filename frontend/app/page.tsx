@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 
-import { BrandMarquee, DangerFlash, Faq, StatsBand } from "@/components/Extras";
+import { BrandMarquee, Faq, StatsBand, VerdictFlash } from "@/components/Extras";
 import { HookScene, SceneState } from "@/components/HookScene";
 import { LinkXray } from "@/components/LinkXray";
 import { Logo, LogoMark } from "@/components/Logo";
@@ -176,7 +176,7 @@ function ResultCard({ result, ms, lang }: { result: ScanResult; ms: number; lang
   const ticks = 25;
 
   return (
-    <section aria-live="polite" className={`glass card-in mt-8 overflow-hidden rounded-2xl ${result.verdict === "dangerous" ? "shake" : ""}`}>
+    <section id="scan-result" aria-live="polite" className={`glass card-in mt-8 scroll-mt-24 overflow-hidden rounded-2xl ${result.verdict === "dangerous" ? "shake" : ""}`}>
       <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <p className={`flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] ${tone.text}`}>
@@ -251,7 +251,7 @@ function LinkList({
 }) {
   const t = STRINGS[lang];
   return (
-    <section className="glass card-in mt-8 overflow-hidden rounded-2xl">
+    <section id="scan-list" className="glass card-in mt-8 scroll-mt-24 overflow-hidden rounded-2xl">
       <p className="border-b border-line px-6 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-faint">
         {t.linksFound.replace("{n}", String(links.length))}
       </p>
@@ -312,6 +312,16 @@ export default function Home() {
   const t = STRINGS[lang];
 
   useReveal(lang);
+
+  // On phones the result appears below the fold; bring it into view once per scan.
+  useEffect(() => {
+    if (!scanId || window.innerWidth >= 1024) return;
+    const id = setTimeout(() => {
+      const el = document.getElementById("scan-list") ?? document.getElementById("scan-result");
+      if (el && el.getBoundingClientRect().top > window.innerHeight * 0.6) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 120);
+    return () => clearTimeout(id);
+  }, [scanId]);
 
   // Wake the API as soon as the page opens: on the free plan it sleeps after
   // 15 idle minutes, and waking takes ~50 s. By the time a link is pasted it
@@ -459,7 +469,7 @@ export default function Home() {
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden">
       <div className="aurora" aria-hidden="true" />
-      {shown?.verdict === "dangerous" && <DangerFlash key={`flash-${scanId}-${selected}`} />}
+      {shown && <VerdictFlash key={`flash-${scanId}-${selected}`} verdict={shown.verdict} />}
       <div className="grid-bg h-[900px]" aria-hidden="true" />
       <header className="sticky top-0 z-40 border-b border-line bg-ink/60 backdrop-blur-xl">
         <div className="mx-auto flex h-[68px] max-w-6xl items-center justify-between px-5 sm:px-8">
@@ -546,7 +556,18 @@ export default function Home() {
               {t.subtitle}
             </p>
 
-            <form onSubmit={onSubmit} className="rise-in mt-9" style={{ animationDelay: "0.24s" }}>
+            <ul className="rise-in mt-6 hidden flex-wrap sm:flex gap-2 font-mono text-[11px] text-muted" style={{ animationDelay: "0.2s" }}>
+              {[...t.proof, t.privacy].map((p) => (
+                <li key={p} className="flex items-center gap-2 rounded-lg border border-line bg-deep/40 px-2.5 py-1.5">
+                  <svg viewBox="0 0 16 16" className="h-3 w-3 shrink-0 text-sea" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+                    <path d="M3 8.5 6.5 12 13 4.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  {p}
+                </li>
+              ))}
+            </ul>
+
+            <form onSubmit={onSubmit} className="rise-in mt-8" style={{ animationDelay: "0.24s" }}>
               <div role="tablist" className="mb-3 inline-flex gap-1 rounded-full border border-line bg-deep/60 p-1 font-mono text-[11px] uppercase tracking-[0.15em]">
                 {(["url", "text"] as const).map((m) => (
                   <button
@@ -645,17 +666,6 @@ export default function Home() {
               </p>
             )}
 
-            <ul className="rise-in mt-9 flex flex-wrap gap-2 font-mono text-[11px] text-muted" style={{ animationDelay: "0.36s" }}>
-              {[...t.proof, t.privacy].map((p) => (
-                <li key={p} className="flex items-center gap-2 rounded-lg border border-line bg-deep/40 px-2.5 py-1.5">
-                  <svg viewBox="0 0 16 16" className="h-3 w-3 shrink-0 text-sea" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
-                    <path d="M3 8.5 6.5 12 13 4.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  {p}
-                </li>
-              ))}
-            </ul>
-
             {error && (
               <p role="alert" className="card-in mt-8 rounded-xl border border-bobber/40 bg-bobber/[0.07] px-4 py-3 text-sm text-paper">
                 {t[error]}
@@ -667,6 +677,18 @@ export default function Home() {
             )}
 
             {shown && <ResultCard key={`${scanId}-${selected}`} result={shown} ms={ms} lang={lang} />}
+
+            {/* On phones the feature list sits below the result so the scan box stays on the first screen. */}
+            <ul className="mt-8 flex flex-wrap gap-1.5 sm:hidden font-mono text-[11px] text-muted">
+              {[...t.proof, t.privacy].map((p) => (
+                <li key={p} className="flex items-center gap-2 rounded-lg border border-line bg-deep/40 px-2.5 py-1.5">
+                  <svg viewBox="0 0 16 16" className="h-3 w-3 shrink-0 text-sea" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+                    <path d="M3 8.5 6.5 12 13 4.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  {p}
+                </li>
+              ))}
+            </ul>
           </div>
 
           <div className="hidden lg:block">

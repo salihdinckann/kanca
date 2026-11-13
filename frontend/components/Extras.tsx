@@ -128,7 +128,7 @@ export function Faq({ lang }: { lang: Lang }) {
   );
 }
 
-/** One orange flash across the screen when a scan comes back dangerous. */
-export function DangerFlash() {
-  return <div className="danger-flash" aria-hidden="true" />;
+/** A flash of the verdict's colour around the screen edges when a result arrives. */
+export function VerdictFlash({ verdict }: { verdict: "safe" | "suspicious" | "dangerous" }) {
+  return <div className={`danger-flash flash-${verdict}`} aria-hidden="true" />;
 }
