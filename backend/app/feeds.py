@@ -65,22 +65,36 @@ class Feeds:
         params: dict = {"desc": "PH", "per-page": USOM_PAGE}
         if self.usom_latest:
             params["date_gte"] = self.usom_latest
-        page, added = 1, 0
+        page, added, newest = 1, 0, self.usom_latest
         while True:
-            res = await client.get(USOM_API, params={**params, "page": page}, timeout=60)
-            res.raise_for_status()
-            models = res.json().get("models", [])
+            models = await self._usom_page(client, {**params, "page": page})
             for m in models:
                 h = _host(m.get("url", ""))
                 if h:
                     self.hosts.setdefault(h, "usom")
                     added += 1
-                if not self.usom_latest or m.get("date", "") > self.usom_latest:
-                    self.usom_latest = m.get("date")
+                if not newest or m.get("date", "") > newest:
+                    newest = m.get("date")
             if len(models) < USOM_PAGE:
                 break
             page += 1
+        # Only move the bookmark once every page arrived; a failed page means the
+        # next run starts over instead of silently skipping older entries.
+        self.usom_latest = newest
         log.info("usom: +%d (total %d hosts)", added, len(self.hosts))
+
+    @staticmethod
+    async def _usom_page(client: httpx.AsyncClient, params: dict) -> list[dict]:
+        for attempt in range(3):
+            try:
+                res = await client.get(USOM_API, params=params, timeout=120)
+                res.raise_for_status()
+                return res.json().get("models", [])
+            except (httpx.HTTPError, ValueError):
+                if attempt == 2:
+                    raise
+                await asyncio.sleep(5 * (attempt + 1))
+        return []
 
     async def _openphish(self, client: httpx.AsyncClient) -> None:
         res = await client.get(OPENPHISH, timeout=30)

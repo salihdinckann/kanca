@@ -66,3 +66,32 @@ def test_impersonation_raises_score_with_named_reason(client, intel, clean_feeds
     body = scan(client, "https://trendyoll.xin")
     assert body["verdict"] == "dangerous"
     assert "trendyol" in body["reasons"][0]
+
+
+def test_usom_bookmark_waits_for_every_page(monkeypatch):
+    import asyncio
+
+    import httpx
+
+    from app import feeds as feeds_mod
+
+    monkeypatch.setattr(feeds_mod, "USOM_PAGE", 2)
+    pages = {
+        1: [{"url": "a.example", "date": "2026-11-13 10:00"}, {"url": "b.example", "date": "2026-11-12 10:00"}],
+        2: None,  # fails
+    }
+
+    async def fake_page(_client, params):
+        rows = pages[params["page"]]
+        if rows is None:
+            raise httpx.ConnectTimeout("boom")
+        return rows
+
+    f = feeds_mod.Feeds()
+    monkeypatch.setattr(f, "_usom_page", fake_page)
+    with pytest.raises(httpx.ConnectTimeout):
+        asyncio.run(f._usom(None))
+    assert f.usom_latest is None  # retry will start from the beginning
+    pages[2] = [{"url": "c.example", "date": "2026-11-11 10:00"}]
+    asyncio.run(f._usom(None))
+    assert f.usom_latest == "2026-11-13 10:00" and {"a.example", "b.example", "c.example"} <= set(f.hosts)
