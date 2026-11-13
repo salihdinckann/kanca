@@ -19,7 +19,8 @@
 - **Bilingual:** Turkish and English UI and explanations
 - **Turkey-aware:** detects impersonation of Turkish banks, carriers and e-commerce brands (e.g. fake PTT cargo or Garanti BBVA links)
 - **Paste a whole message:** links are extracted from SMS, WhatsApp or email text and checked one by one
-- **Threat intelligence:** Google Safe Browsing lookup and domain age from RDAP ("registered 4 days ago")
+- **Threat intelligence:** USOM's national phishing list (~110k entries) and OpenPhish, refreshed hourly in memory; Google Safe Browsing; domain age from RDAP ("registered 4 days ago")
+- **Brand impersonation:** typos (`trendyoll`), look-alike letters (`paypa1`), bait words (`garanti-odeme-portali`) and brand-in-subdomain tricks for ~40 Turkish and global brands, each with a named reason
 - **Browser extension:** scan the open page from the toolbar, or right-click any link → *Scan link with Kanca*
 - **Four-layer analysis:** reputation and threat lists → ML model on the hostname → domain age → rule-based path signals
 
@@ -29,10 +30,12 @@
 Message ──► link extraction ──► URL(s)
 URL ──► Google Safe Browsing ──listed──► dangerous
     ──► Reputation (allowlist + Tranco top 10k) ──known──► safe
+    ──► USOM / OpenPhish blocklists ──listed──► dangerous
             │ unknown
             ▼
      Hostname features ──► Gradient boosting model ──► P(phishing)
             +  domain age (RDAP): < 30 days ↑, > 2 years ↓
+            +  brand impersonation (typo, look-alike letters, bait words)
             +  path / scheme rules (@, //, brand in path, no HTTPS)
             ▼
      risk score + reasons   (no concrete reason → capped at "suspicious")
@@ -41,6 +44,8 @@ URL ──► Google Safe Browsing ──listed──► dangerous
 | Layer | What it does |
 |---|---|
 | Threat list | Google Safe Browsing v4 lookup (optional, enabled with `SAFE_BROWSING_API_KEY`). |
+| Blocklists | USOM's phishing list (Turkey's national CERT, ~110k entries) and the OpenPhish feed, loaded into memory in the background and refreshed hourly. Checked after the reputation layer, so one bad page on a big platform doesn't flag the whole site. |
+| Impersonation | Look-alike domains for ~40 brands people in Turkey trust: misspellings (edit distance), look-alike characters and punycode, brand names glued to bait words (`odeme`, `giris`, `randevu`) or placed in a subdomain. |
 | Reputation | Hand-picked global and Turkish domains plus the [Tranco](https://tranco-list.eu/) top 10k, with multi-part suffix handling (`.com.tr`, `.co.uk`). Hosting platforms, file storage and URL shorteners are removed, since phishing kits live there too. |
 | ML model | `HistGradientBoostingClassifier` on 19 lexical hostname features: length, digits, subdomain structure, entropy, suspicious TLD, brand-in-subdomain, punycode, and more. |
 | Domain age | Registration date from RDAP, cached for a day. Brand-new domains raise the score; long-established ones lower it. |
@@ -170,7 +175,9 @@ POST /api/scan/text
 - [x] Tranco top-10k reputation
 - [x] Tests and CI
 - [x] Chrome extension
-- [ ] SSL certificate checks
+- [x] USOM and OpenPhish blocklists
+- [x] Turkish brand impersonation detection
+- [ ] SSL certificate checks (crt.sh was tried; its data lagged too far behind to catch new phishing domains)
 - [ ] LLM-generated explanations for SMS and email text
 
 ## Author

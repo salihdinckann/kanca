@@ -29,10 +29,11 @@ NE GÖSTERİR
 • Nedenleri: marka taklidi, çok yeni alan adı, şüpheli uzantı, HTTPS eksikliği gibi bulgular
 
 NASIL ÇALIŞIR
-1. Google Safe Browsing ile bilinen tehlikeli siteler kontrol edilir.
+1. Google Safe Browsing, USOM'un 110 bini aşkın kayıtlı ulusal oltalama listesi ve OpenPhish ile bilinen tehlikeli siteler kontrol edilir.
 2. 235.000 gerçek linklik bir veri setiyle eğitilmiş makine öğrenmesi modeli alan adını inceler.
 3. Alan adının kaç gün önce alındığı RDAP kayıtlarından öğrenilir.
 4. Dünyanın en çok ziyaret edilen 10.000 sitesi ve bilinen Türk banka, kargo ve e-ticaret siteleri tanınır.
+5. Bu markaların harf oynanmış (trendyoll), benzer harfli (paypa1) veya "odeme", "giris" gibi yem kelimeli taklitleri yakalanır.
 
 GİZLİLİK
 • Hiçbir şey kendiliğinden taranmaz; bir adres yalnızca sen tıkladığında gönderilir.
@@ -57,10 +58,11 @@ WHAT YOU GET
 • The reasons behind it: brand impersonation, a brand-new domain, an abused extension, missing HTTPS and more
 
 HOW IT WORKS
-1. Google Safe Browsing checks the link against known dangerous sites.
+1. Google Safe Browsing, USOM's national phishing list (110,000+ entries) and OpenPhish check the link against known dangerous sites.
 2. A machine-learning model trained on a dataset of 235,000 real links inspects the domain.
 3. The domain's registration age is looked up in RDAP.
 4. The world's 10,000 most visited sites and well-known Turkish banks, carriers and shops are recognized instantly.
+5. Misspelled (trendyoll), look-alike (paypa1) and bait-word copies of these brands are caught.
 
 PRIVACY
 • Nothing is scanned automatically; an address is only sent when you click.

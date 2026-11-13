@@ -28,7 +28,7 @@ export const STRINGS = {
     scanning: "Kontrol ediliyor",
     examples: "Dene",
     privacy: "Linkler kaydedilmez.",
-    proof: ["235 bin gerçek link ile eğitildi", "%93 kesinlik", "Alan adı yaşı + Google Safe Browsing"],
+    proof: ["235 bin gerçek link ile eğitildi", "%93 kesinlik", "USOM + OpenPhish listeleri", "Marka taklidi tespiti", "Alan adı yaşı + Google Safe Browsing"],
     invalid: "Geçerli bir link gir.",
     failed: "Kontrol tamamlanamadı. Sunucu uyanıyor olabilir; birkaç saniye sonra tekrar dene.",
     scene: {
@@ -118,7 +118,7 @@ export const STRINGS = {
     scanning: "Checking",
     examples: "Try",
     privacy: "Links are not stored.",
-    proof: ["Trained on 235k real URLs", "93% precision", "Domain age + Google Safe Browsing"],
+    proof: ["Trained on 235k real URLs", "93% precision", "USOM + OpenPhish lists", "Brand impersonation checks", "Domain age + Google Safe Browsing"],
     invalid: "Enter a valid link.",
     failed: "The check could not be completed. The server may be waking up; try again in a few seconds.",
     scene: {
