@@ -18,6 +18,9 @@ from .features import (
     BRANDS, HOST_FEATURE_NAMES, SUSPICIOUS_WORDS, explain, extract_features, host_feature_vector, host_of,
     reason, split_host,
 )
+from .feeds import enabled as feeds_enabled
+from .feeds import feeds
+from .impersonation import detect as impersonation
 from .intel import domain_age_days, safe_browsing_enabled, safe_browsing_match
 from .reputation import KNOWN_HOSTS, is_hosting_platform, is_known, is_popular, official_domain
 from .textscan import extract_links
@@ -30,12 +33,15 @@ http: httpx.AsyncClient | None = None
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     global http
-    http = httpx.AsyncClient(headers={"User-Agent": "Kanca/1.1 (+https://kanca.salihdinckan.com)"})
+    http = httpx.AsyncClient(headers={"User-Agent": "Kanca/1.2 (+https://kanca.salihdinckan.com)"})
+    task = asyncio.create_task(feeds.run_forever(http)) if feeds_enabled() else None
     yield
+    if task:
+        task.cancel()
     await http.aclose()
 
 
-app = FastAPI(title="Kanca API", version="1.1.0", lifespan=lifespan)
+app = FastAPI(title="Kanca API", version="1.2.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     # Comma-separated list in production, e.g. "https://kanca.salihdinckan.com"
@@ -64,7 +70,7 @@ class UrlScanResponse(BaseModel):
     risk_score: int  # 0-100
     verdict: Literal["safe", "suspicious", "dangerous"]
     reasons: list[str]
-    engine: str  # "reputation", "ml", "heuristic" or "safe_browsing"
+    engine: str  # "reputation", "ml", "heuristic", "safe_browsing" or "threat_feed"
     domain_age_days: int | None = None
     safe_browsing: Literal["clean", "match", "skipped"] = "skipped"
 
@@ -130,6 +136,12 @@ def _age_adjustment(days: int | None, lang: str) -> tuple[float, str | None]:
     return 0.0, None
 
 
+# Score added for each kind of brand impersonation (see impersonation.detect).
+IMPERSONATION_BOOST = {
+    "homoglyph": 0.55, "typo": 0.5, "suffix": 0.4, "glued": 0.35, "subdomain": 0.25, "contains": 0.15,
+}
+
+
 def _verdict(score: int) -> str:
     if score >= 70:
         return "dangerous"
@@ -173,6 +185,14 @@ async def analyze(url: str, lang: str) -> UrlScanResponse:
             safe_browsing=sb_state,
         )
 
+    listed = feeds.blocklisted(host)
+    if listed:
+        return UrlScanResponse(
+            url=url, risk_score=98, verdict="dangerous", engine="threat_feed",
+            reasons=[reason(listed, lang)] + explain(feats, lang),
+            domain_age_days=age, safe_browsing=sb_state,
+        )
+
     if model is not None:
         model_p = _model_prob(url)
         sub, _ = split_host(host)
@@ -189,11 +209,22 @@ async def analyze(url: str, lang: str) -> UrlScanResponse:
 
     age_delta, age_reason = _age_adjustment(age, lang)
     prob = min(max(prob + age_delta, 0.0), 1.0)
-    score = round(prob * 100)
 
     reasons = explain(feats, lang)
     if age_reason and age_delta > 0:
         reasons.insert(0, age_reason)
+
+    imp = impersonation(host)
+    if imp:
+        brand, kind = imp
+        if kind == "subdomain" and feats["brand_in_subdomain_or_path"]:
+            reasons = [r for r in reasons if r != reason("brand", lang)]  # replaced by the named version
+            prob = min(prob + 0.1, 1.0)
+        else:
+            prob = min(prob + IMPERSONATION_BOOST[kind], 1.0)
+        reasons.insert(0, reason(f"imp_{kind}", lang, brand=brand))
+    score = round(prob * 100)
+
     if not reasons and score >= 40:
         # Only the model is suspicious and no concrete signal backs it up:
         # never call it "dangerous" without a reason we can show.
@@ -212,7 +243,10 @@ async def analyze(url: str, lang: str) -> UrlScanResponse:
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "model_loaded": model is not None, "safe_browsing": safe_browsing_enabled()}
+    return {
+        "status": "ok", "model_loaded": model is not None, "safe_browsing": safe_browsing_enabled(),
+        "feeds": feeds.status(),
+    }
 
 
 @app.post("/api/scan/url", response_model=UrlScanResponse)
